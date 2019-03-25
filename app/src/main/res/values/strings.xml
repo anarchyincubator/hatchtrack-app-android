@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Hatchtrack Sensor</string>
+    <string name="edit_text_email_default">account@email.com</string>
+    <string name="edit_text_password_default">Password</string>
+    <string name="text_view_password">Password</string>
+    <string name="text_view_email">Email</string>
+    <string name="button_sign_in">Sign In</string>
+    <string name="button_create_account">Create Account</string>
+</resources>

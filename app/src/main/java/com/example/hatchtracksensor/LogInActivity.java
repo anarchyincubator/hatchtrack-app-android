@@ -94,6 +94,10 @@ public class LogInActivity extends AppCompatActivity {
             // Login success, do startActivity() or other thing
             Log.i("auth","Login success");
             mButtonSignIn.setText("Signed In!");
+            Intent intent = new Intent(LogInActivity.this, MainActivity.class);
+            //intent.putExtra(EXTRA_ACCOUNT_EMAIL, account.getEmail());
+            //intent.putExtra(EXTRA_ACCOUNT_ID, account.getId());
+            startActivity(intent);
         }
 
         @Override

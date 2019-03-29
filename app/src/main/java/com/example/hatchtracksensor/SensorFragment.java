@@ -1,22 +1,44 @@
 package com.example.hatchtracksensor;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public class SensorFragment extends Fragment {
 
-    final String databaseURL = "https://db.hatchtrack.com:8086";
+    private TextView mTextViewTimeUpdate;
+    private TextView mTextViewTemperature;
+    private TextView mTextViewHumidity;
+
+    private static final String mDbURL = "https://db.hatchtrack.com:8086";
+    private static final String mDbUser = "reader";
+    private static final String mDbPassword = "B5FX6jIhXz0kbBxE";
+    private static final String mDbName = "peep0";
+    private final static int mDbPollInterval = 1000 * 60 * 1; // 1 minute
+    private InfluxClient mInfluxClient;
+
+    private Handler mHandler = new Handler();
+    private Runnable mHandlerTask = new Runnable() {
+        @Override
+        public void run() {
+            SensorUpdateJob job = new SensorUpdateJob();
+            job.execute("425e11b3-5844-4626-b05a-219d9751e5ca");
+
+            mHandler.postDelayed(mHandlerTask, mDbPollInterval);
+        }
+    };
 
     public SensorFragment() {
         // Required empty public constructor
@@ -27,33 +49,80 @@ public class SensorFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_sensor, container, false);
-
-
-    }
-
-    private void getSensorData() {
-        try {
-            String u = databaseURL;
-            URL url = new URL(u);
-            HttpURLConnection urlConnection  = (HttpURLConnection) url.openConnection();
-            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-            readStream(in);
-            urlConnection.disconnect();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void readStream(InputStream in) {
     }
 
     @Override
     public void onActivityCreated(Bundle bundle) {
         super.onActivityCreated(bundle);
+
+        mTextViewTimeUpdate = getView().findViewById(R.id.textViewTimeUpdate);
+        mTextViewTemperature = getView().findViewById(R.id.textViewTemperature);
+        mTextViewHumidity = getView().findViewById(R.id.textViewHumidity);
+
+        mInfluxClient = new InfluxClient(mDbURL, mDbUser, mDbPassword, mDbName);
+        startRepeatingTask();
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Do something?
+    }
+
+    private void startRepeatingTask() {
+        mHandlerTask.run();
+    }
+
+    private void stopRepeatingTask() {
+        mHandler.removeCallbacks(mHandlerTask);
+    }
+
+    private class SensorUpdateJob extends AsyncTask<String, Void, InfluxClient.InfluxMeasurement> {
+
+        @Override
+        protected InfluxClient.InfluxMeasurement doInBackground(String... uuids) {
+            InfluxClient.InfluxMeasurement influxMeasurement = null;
+
+            for (int i = 0; i < uuids.length; i++) {
+                influxMeasurement = mInfluxClient.getMeasurement(uuids[i]);
+            }
+
+            return influxMeasurement;
+        }
+
+        @Override
+        protected void onPostExecute(InfluxClient.InfluxMeasurement influxMeasurement) {
+            if (null != influxMeasurement) {
+                try {
+                    String fmt;
+
+                    fmt = String.format(
+                            Locale.US,
+                            "%.1f", influxMeasurement.temperature) + " ℃";
+                    mTextViewTemperature.setText(fmt);
+
+                    fmt = String.format(
+                            Locale.US, "%.1f",
+                            influxMeasurement.humidity) + " %";
+                    mTextViewHumidity.setText(fmt);
+
+                    DateFormat isoTimestamp = new SimpleDateFormat(
+                            "yyyy-MM-dd'T'HH:mm:ss'Z'",
+                            Locale.ENGLISH);
+                    DateFormat userTimestamp = new SimpleDateFormat(
+                            "MMM dd, yyyy HH:mm a",
+                            Locale.ENGLISH);
+
+                    isoTimestamp.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    userTimestamp.setTimeZone(TimeZone.getDefault());
+                    Date date = isoTimestamp.parse(influxMeasurement.timestamp);
+                    String localTime = userTimestamp.format(date);
+
+                    mTextViewTimeUpdate.setText("Last Updated: " + localTime);
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

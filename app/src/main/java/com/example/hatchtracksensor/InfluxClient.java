@@ -8,7 +8,6 @@ import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -32,7 +31,7 @@ public class InfluxClient {
         }
     }
 
-    public InfluxClient(String user, String password, String url, String name) {
+    public InfluxClient(String url, String user, String password, String name) {
         mUser = user;
         mPassword = password;
         mdbURL = url;
@@ -40,7 +39,7 @@ public class InfluxClient {
     }
 
     public InfluxMeasurement getMeasurement(String uuid) {
-        InfluxMeasurement influxMeasurement = new InfluxMeasurement();
+        InfluxMeasurement influxMeasurement = null;
 
         try {
             String influxQuery = "";
@@ -59,7 +58,7 @@ public class InfluxClient {
             URL url = new URL(u);
             HttpURLConnection urlConnection  = (HttpURLConnection) url.openConnection();
             InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-            parseMeasurement(in);
+            influxMeasurement = parseJSONToMeasurement(in);
             urlConnection.disconnect();
         }
         catch (Exception e) {
@@ -69,7 +68,7 @@ public class InfluxClient {
         return influxMeasurement;
     }
 
-    private void parseMeasurement(InputStream in) {
+    private InfluxMeasurement parseJSONToMeasurement(InputStream in) {
         /*
          * Parses something that looks like the following...
          * {
@@ -102,8 +101,8 @@ public class InfluxClient {
          * }
          */
 
+        InfluxMeasurement influxMeasurement = new InfluxMeasurement();
         try {
-            InfluxMeasurement influxMeasurement = new InfluxMeasurement();
             String data = IOUtils.toString(in);
             JSONObject reader = new JSONObject(data);
             JSONArray results = reader.getJSONArray("results");
@@ -136,10 +135,11 @@ public class InfluxClient {
                     }
                 }
             }
-            Log.i("MREUTMAN", "done!");
         }
         catch (Exception e) {
             e.printStackTrace();
         }
+
+        return influxMeasurement;
     }
 }

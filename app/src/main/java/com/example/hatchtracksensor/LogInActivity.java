@@ -41,21 +41,6 @@ public class LogInActivity extends AppCompatActivity {
     String mEmail = "";
     String mPassword = "";
 
-    private class SendfeedbackJob extends AsyncTask<String, Void, String> {
-
-        @Override
-        protected String doInBackground(String[] params) {
-            InfluxClient influxClient = new InfluxClient("reader", "B5FX6jIhXz0kbBxE", "https://db.hatchtrack.com:8086", "peep0");
-            influxClient.getMeasurement("425e11b3-5844-4626-b05a-219d9751e5ca");
-            return "some message";
-        }
-
-        @Override
-        protected void onPostExecute(String message) {
-            //process message
-        }
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,9 +69,6 @@ public class LogInActivity extends AppCompatActivity {
                 mClientId,
                 mClientSecret,
                 Regions.US_WEST_2);
-
-        SendfeedbackJob job = new SendfeedbackJob();
-        job.execute("hello", "world");
     }
 
     public void onClickButtonSignIn(View v)

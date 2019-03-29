@@ -10,4 +10,10 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_desc">Navigation header</string>
+    <string name="button_peep_select">Peep Name</string>
+    <string name="text_view_time_update">Waiting for update...</string>
+    <string name="text_view_temperature">---</string>
+    <string name="text_view_humidity">---</string>
+    <string name="image_view_temperature_content_description">temperature icon</string>
+    <string name="image_view_humidity_content_description">humidity icon</string>
 </resources>

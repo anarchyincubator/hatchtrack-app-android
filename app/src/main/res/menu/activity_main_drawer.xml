@@ -7,7 +7,7 @@
         <item android:title="Menu">
             <menu>
                 <item
-                    android:id="@+id/nav_gallery"
+                    android:id="@+id/navPeepSelect"
                     android:icon="@drawable/ic_menu_gallery"
                     android:title="Peeps" />
                 <item
@@ -26,11 +26,11 @@
         <menu>
             <item
                 android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
+                android:icon="@drawable/ic_assignment_black_24dp"
                 android:title="Incubation Guide" />
             <item
                 android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
+                android:icon="@drawable/ic_live_help_black_24dp"
                 android:title="Support Forum" />
             <item
                 android:id="@+id/nav_send"

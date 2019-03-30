@@ -37,4 +37,5 @@ dependencies {
     implementation 'org.eclipse.paho:org.eclipse.paho.android.service:1.1.1'
     //For AWSMobileClient only:
     implementation 'com.amazonaws:aws-android-sdk-mobile-client:2.12.+'
+    implementation 'com.android.support:recyclerview-v7:28.0.0'
 }

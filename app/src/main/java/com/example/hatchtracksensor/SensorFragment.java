@@ -1,5 +1,6 @@
 package com.example.hatchtracksensor;
 
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -8,6 +9,7 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import java.text.DateFormat;
@@ -18,9 +20,14 @@ import java.util.TimeZone;
 
 public class SensorFragment extends Fragment {
 
+    public static final String PEEP_MANAGER_KEY = "PEEP_MANAGER";
+
     private TextView mTextViewTimeUpdate;
     private TextView mTextViewTemperature;
     private TextView mTextViewHumidity;
+    private Button mButtonPeepSelect;
+
+    private PeepManager mPeepManager;
 
     private static final String mDbURL = "https://db.hatchtrack.com:8086";
     private static final String mDbUser = "reader";
@@ -33,8 +40,11 @@ public class SensorFragment extends Fragment {
     private Runnable mHandlerTask = new Runnable() {
         @Override
         public void run() {
-            SensorUpdateJob job = new SensorUpdateJob();
-            job.execute("425e11b3-5844-4626-b05a-219d9751e5ca");
+            PeepManager.PeepUnit peep = mPeepManager.getPeepUnitActive();
+
+            mButtonPeepSelect.setText(peep.getName());
+            SensorUpdateJob sensorUpdateJob = new SensorUpdateJob();
+            sensorUpdateJob.execute(peep.getUUID());
 
             mHandler.postDelayed(mHandlerTask, mDbPollInterval);
         }
@@ -55,9 +65,22 @@ public class SensorFragment extends Fragment {
     public void onActivityCreated(Bundle bundle) {
         super.onActivityCreated(bundle);
 
+        mPeepManager = new PeepManager();
+        PeepManager.PeepUnit peep = mPeepManager.getPeepUnitActive();
+
         mTextViewTimeUpdate = getView().findViewById(R.id.textViewTimeUpdate);
         mTextViewTemperature = getView().findViewById(R.id.textViewTemperature);
         mTextViewHumidity = getView().findViewById(R.id.textViewHumidity);
+        mButtonPeepSelect = getView().findViewById(R.id.buttonPeepSelect);
+        mButtonPeepSelect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Fragment fragment = new PeepSelectFragment();
+                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                ft.replace(R.id.content_view, fragment);
+                ft.commit();
+            }
+        });
 
         mInfluxClient = new InfluxClient(mDbURL, mDbUser, mDbPassword, mDbName);
         startRepeatingTask();

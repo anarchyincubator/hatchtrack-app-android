@@ -2,6 +2,7 @@ package com.example.hatchtracksensor;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -29,13 +30,7 @@ public class LogInActivity extends AppCompatActivity {
     private EditText mEditTextEmail;
     private EditText getmEditTextPassword;
 
-    static final String mSignUpURL = "https://hatchtrack.auth.us-west-2.amazoncognito.com/signup?response_type=token&client_id=34uo31crc6dbm4i11sgaqv03lb&redirect_uri=hatchtrack.sensor://main";
-
-    CognitoUserPool mUserPool;
-
-    String mUserPoolId = "us-west-2_wOcu7aBMM";
-    String mClientId = "34uo31crc6dbm4i11sgaqv03lb";
-    String mClientSecret = "1vvjgracnpsshkl8rpe2fgq5df7eeapvdq9jd486bkd8vdjud5en";
+    AccountManager mAccountManager;
 
     String mEmail = "";
     String mPassword = "";
@@ -53,6 +48,7 @@ public class LogInActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         String action = intent.getAction();
+        // TODO: Use action from Intent?
         Uri data = intent.getData();
         if (null != data) {
             mTextViewStatus.setVisibility(View.VISIBLE);
@@ -62,74 +58,44 @@ public class LogInActivity extends AppCompatActivity {
             mTextViewStatus.setVisibility(View.INVISIBLE);
         }
 
-        mUserPool = new CognitoUserPool(
-                getApplicationContext(),
-                mUserPoolId,
-                mClientId,
-                mClientSecret,
-                Regions.US_WEST_2);
+        mAccountManager = new AccountManager(getApplicationContext());
     }
 
     public void onClickButtonSignIn(View v)
     {
         mEmail = mEditTextEmail.getText().toString();
         mPassword = getmEditTextPassword.getText().toString();
+
+        mTextViewStatus.setVisibility(View.INVISIBLE);
         mButtonSignIn.setEnabled(false);
         mButtonCreateAccount.setEnabled(false);
-        CognitoUser user = mUserPool.getUser(mEmail);
-        user.getSessionInBackground(authenticationHandler);
+
+        mAccountManager.setEmailPassword(mEmail, mPassword);
+        mAccountManager.startAuth(new MyInterface() {
+            @Override
+            public void onSuccess(String response) {
+                mButtonSignIn.setText("Signed In!");
+                Intent intent = new Intent(LogInActivity.this, MainActivity.class);
+                startActivity(intent);
+            }
+
+            @Override
+            public void onFailure(String response) {
+                mTextViewStatus.setText("Invalid Email or Password");
+                mTextViewStatus.setVisibility(View.VISIBLE);
+
+                mButtonSignIn.setEnabled(true);
+                mButtonCreateAccount.setEnabled(true);
+            }
+        });
     }
 
     public void onClickButtonCreateAccount(View v)
     {
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mSignUpURL));
-        startActivity(intent);
+            Intent intent = new Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse(mAccountManager.getAccountCreateURL()));
+
+            startActivity(intent);
     }
-
-    private AuthenticationHandler authenticationHandler = new AuthenticationHandler()
-    {
-        @Override
-        public void onSuccess(final CognitoUserSession userSession, final CognitoDevice newDevice)
-        {
-            // Login success, do startActivity() or other thing
-            Log.i("auth","Login success");
-            mButtonSignIn.setText("Signed In!");
-        }
-
-        @Override
-        public void getAuthenticationDetails(final AuthenticationContinuation continuation,
-                                             final String userId)
-        {
-            if (userId != null)
-            {
-                mEmail = userId;
-            }
-
-            Log.i("auth","Login details");
-            final AuthenticationDetails authDetails = new AuthenticationDetails(
-                    mEmail,
-                    mPassword,
-                    null);
-            continuation.setAuthenticationDetails(authDetails);
-            continuation.continueTask();
-        }
-
-        @Override
-        public void getMFACode(final MultiFactorAuthenticationContinuation continuation)
-        {
-            Log.i("auth","Login MFA");
-        }
-
-        @Override
-        public void authenticationChallenge(final ChallengeContinuation continuation)
-        {
-            Log.i("auth","Login challenge");
-        }
-
-        @Override
-        public void onFailure(final Exception exception)
-        {
-            Log.i("auth","Login failure");
-        }
-    };
 }

@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#30434c</color>
+    <color name="colorPrimary">#30434C</color>
     <color name="colorPrimaryDark">#202d33</color>
     <color name="colorAccent">#e83125</color>
     <color name="colorBackground">#cce7f4</color>
     <color name="background_material_light">#cce7f4</color>
     <color name="eggWhite">#FAFAFA</color>
+    <color name="lightGrey">#F0F0F0</color>
+    <color name="darkGrey">#999999</color>
 </resources>

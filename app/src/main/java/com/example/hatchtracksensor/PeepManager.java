@@ -74,7 +74,7 @@ public class PeepManager {
     }
 
     public void setPeepUnitActive(int i) {
-        if ((i > 0) && (i < mPeepList.size())) {
+        if ((i >= 0) && (i < mPeepList.size())) {
             mActivePeepIndex = i;
         }
     }

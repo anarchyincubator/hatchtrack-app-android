@@ -28,6 +28,7 @@ public class SensorFragment extends Fragment {
     private Button mButtonPeepSelect;
 
     private PeepManager mPeepManager;
+    private SettingsManager mSettingsManager;
 
     private static final String mDbURL = "https://db.hatchtrack.com:8086";
     private static final String mDbUser = "reader";
@@ -66,6 +67,7 @@ public class SensorFragment extends Fragment {
         super.onActivityCreated(bundle);
 
         mPeepManager = new PeepManager();
+        mSettingsManager = new SettingsManager();
         PeepManager.PeepUnit peep = mPeepManager.getPeepUnitActive();
 
         mTextViewTimeUpdate = getView().findViewById(R.id.textViewTimeUpdate);
@@ -116,11 +118,26 @@ public class SensorFragment extends Fragment {
         protected void onPostExecute(InfluxClient.InfluxMeasurement influxMeasurement) {
             if (null != influxMeasurement) {
                 try {
-                    String fmt;
+                    String fmt = "";
 
-                    fmt = String.format(
-                            Locale.US,
-                            "%.1f", influxMeasurement.temperature) + " ℃";
+                    final SettingsManager.TemperatureUnits CELSIUS =
+                            SettingsManager.TemperatureUnits.CELSIUS;
+                    final SettingsManager.TemperatureUnits FAHRENHEIT =
+                            SettingsManager.TemperatureUnits.FAHRENHEIT;
+                    SettingsManager.TemperatureUnits units = mSettingsManager.getTemperatureUnits();
+
+                    if (CELSIUS == units) {
+                        fmt = String.format(
+                                Locale.US,
+                                "%.1f",
+                                influxMeasurement.temperature) + " ℃";
+                    }
+                    else if (FAHRENHEIT == units) {
+                        fmt = String.format(
+                                Locale.US,
+                                "%.1f",
+                                (influxMeasurement.temperature * 1.8) + 32.0) + " ℉";
+                    }
                     mTextViewTemperature.setText(fmt);
 
                     fmt = String.format(

@@ -16,4 +16,13 @@
     <string name="text_view_humidity">---</string>
     <string name="image_view_temperature_content_description">temperature icon</string>
     <string name="image_view_humidity_content_description">humidity icon</string>
+    <string name="text_view_temperature_settings">Temperature Units</string>
+    <string name="text_view_settings_title_account_email">Account Email</string>
+    <string name="settings_title">Settings</string>
+    <string name="text_view_status">Please Log In</string>
+
+    <string-array name="temperature_units">
+        <item>Fahrenheit (℉)</item>
+        <item>Celsius (℃)</item>
+    </string-array>
 </resources>

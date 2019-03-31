@@ -10,9 +10,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class PeepSelectFragment extends Fragment {
+
+    private PeepManager mPeepManager;
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
@@ -34,10 +38,12 @@ public class PeepSelectFragment extends Fragment {
     public void onActivityCreated(Bundle bundle) {
         super.onActivityCreated(bundle);
 
+        mPeepManager = new PeepManager();
+
         // data to populate the RecyclerView with
-        ArrayList<String> peepNames = new ArrayList<>();
-        peepNames.add("Peep 1");
-        peepNames.add("Peep 2");
+        ArrayList<String> peepNames = new ArrayList<>(Arrays.asList(mPeepManager.getPeepNames()));
+        //peepNames.add("Peep 1");
+        //peepNames.add("Peep 2");
 
         // set up the RecyclerView
         mRecyclerView = getView().findViewById(R.id.recyclerViewPeepSelect);
@@ -47,8 +53,7 @@ public class PeepSelectFragment extends Fragment {
                 new MyRecyclerViewAdapter.ItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                        //Toast.makeText(getActivity(), "You clicked " + adapter.getItem(position) + " on row number " + position, Toast.LENGTH_SHORT).show();
-                        // TODO: set active Peep in PeepManager class;
+                        mPeepManager.setPeepUnitActive(position);
 
                         Fragment fragment = new SensorFragment();
                         FragmentTransaction ft = getFragmentManager().beginTransaction();

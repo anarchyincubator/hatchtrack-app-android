@@ -2,6 +2,8 @@ package com.example.hatchtracksensor;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -10,7 +12,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.view.View;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -46,44 +47,40 @@ public class MainActivity extends AppCompatActivity
         ft.commit();
     }
 
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
-    }
-
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        Fragment fragment = null;
-
         if (id == R.id.navPeepSelect) {
-            fragment = new PeepSelectFragment();
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+            Fragment fragment = new PeepSelectFragment();
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            ft.replace(R.id.content_view, fragment);
+            ft.addToBackStack(null);
+            ft.commit();
+        } else if (id == R.id.navSettings) {
+            Fragment fragment = new SettingsFragment();
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            ft.replace(R.id.content_view, fragment);
+            ft.addToBackStack(null);
+            ft.commit();
+        } else if (id == R.id.navLogOut) {
+            Intent intent = new Intent(MainActivity.this, LogInActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.navIncubationGuide) {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://hatchtrack.com"));
+            startActivity(intent);
+        } else if (id == R.id.navSupportForum) {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://hatchtrack.com"));
+            startActivity(intent);
+        } else if (id == R.id.navBuyEggs) {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://classifieds.hatchtrack.com/chicken-eggs"));
+            startActivity(intent);
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
-
-        if (null != fragment) {
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
-            ft.replace(R.id.content_view, fragment);
-            ft.commit();
-        }
 
         return true;
     }

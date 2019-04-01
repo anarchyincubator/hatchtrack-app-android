@@ -47,7 +47,7 @@ public class InfluxClient {
 
             influxQuery += "SELECT * FROM peep ";
             influxQuery += "WHERE peep_uuid='" + uuid + "' ";
-            influxQuery += "GROUP BY * ORDER BY ASC LIMIT 1";
+            influxQuery += "GROUP BY * ORDER BY DESC LIMIT 1";
 
             uriQuery += "?u=" + mUser;
             uriQuery += "&p=" + mPassword;

@@ -2,25 +2,12 @@ package com.example.hatchtracksensor;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoDevice;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserSession;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.AuthenticationContinuation;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.AuthenticationDetails;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.ChallengeContinuation;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.MultiFactorAuthenticationContinuation;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.AuthenticationHandler;
-import com.amazonaws.regions.Regions;
 
 public class LogInActivity extends AppCompatActivity {
 
@@ -28,7 +15,7 @@ public class LogInActivity extends AppCompatActivity {
     private Button mButtonCreateAccount;
     private TextView mTextViewStatus;
     private EditText mEditTextEmail;
-    private EditText getmEditTextPassword;
+    private EditText mEditTextPassword;
 
     AccountManager mAccountManager;
 
@@ -44,7 +31,7 @@ public class LogInActivity extends AppCompatActivity {
         mButtonCreateAccount = findViewById(R.id.buttonCreateAccount);
         mTextViewStatus = findViewById(R.id.textViewStatus);
         mEditTextEmail = findViewById(R.id.editTextEmail);
-        getmEditTextPassword = findViewById(R.id.editTextPassword);
+        mEditTextPassword = findViewById(R.id.editTextPassword);
 
         Intent intent = getIntent();
         String action = intent.getAction();
@@ -59,12 +46,16 @@ public class LogInActivity extends AppCompatActivity {
         }
 
         mAccountManager = new AccountManager(getApplicationContext());
+        mEmail = mAccountManager.getEmail();
+        mPassword = mAccountManager.getPassword();
+        mEditTextEmail.setText(mEmail);
+        mEditTextPassword.setText(mPassword);
     }
 
     public void onClickButtonSignIn(View v)
     {
         mEmail = mEditTextEmail.getText().toString();
-        mPassword = getmEditTextPassword.getText().toString();
+        mPassword = mEditTextPassword.getText().toString();
 
         mTextViewStatus.setVisibility(View.INVISIBLE);
         mButtonSignIn.setEnabled(false);

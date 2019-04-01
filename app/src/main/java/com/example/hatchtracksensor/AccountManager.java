@@ -1,6 +1,7 @@
 package com.example.hatchtracksensor;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.util.Log;
 import android.view.View;
@@ -21,6 +22,8 @@ public class AccountManager {
     private static CognitoUserPool mUserPool = null;
     private MyInterface mMyInterface;
 
+    private SharedPreferences mSharedPreferences;
+
     private static final String mSignUpURL = "https://hatchtrack.auth.us-west-2.amazoncognito.com/signup?response_type=token&client_id=34uo31crc6dbm4i11sgaqv03lb&redirect_uri=hatchtrack.sensor://main";
     private static String mUserPoolId = "us-west-2_wOcu7aBMM";
     private static String mClientId = "34uo31crc6dbm4i11sgaqv03lb";
@@ -37,16 +40,32 @@ public class AccountManager {
                     mClientId,
                     mClientSecret,
                     Regions.US_WEST_2);
+
+            mSharedPreferences = context.getSharedPreferences(
+                    "UserData",
+                    context.MODE_PRIVATE);
+
+            mEmail = mSharedPreferences.getString("email","");
+            mPassword = mSharedPreferences.getString("password","");
         }
     }
 
     public void setEmailPassword(String email, String password) {
         mEmail = email;
         mPassword = password;
+
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putString("email", mEmail);
+        editor.putString("password", mPassword);
+        editor.apply();
     }
 
     public String getEmail() {
         return mEmail;
+    }
+
+    public String getPassword() {
+        return mPassword;
     }
 
     public void startAuth(MyInterface myInterface) {

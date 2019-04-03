@@ -33,6 +33,10 @@ public class LogInActivity extends AppCompatActivity {
         mEditTextEmail = findViewById(R.id.editTextEmail);
         mEditTextPassword = findViewById(R.id.editTextPassword);
 
+        /*
+         * We have an Intent with non-null data if we're returning from account registration
+         * launched in the onClickButtonCreateAccount function.
+         */
         Intent intent = getIntent();
         String action = intent.getAction();
         // TODO: Use action from Intent?
@@ -45,6 +49,7 @@ public class LogInActivity extends AppCompatActivity {
             mTextViewStatus.setVisibility(View.INVISIBLE);
         }
 
+        // Grab the cached Email and Password.
         mAccountManager = new AccountManager(getApplicationContext());
         mEmail = mAccountManager.getEmail();
         mPassword = mAccountManager.getPassword();
@@ -54,6 +59,10 @@ public class LogInActivity extends AppCompatActivity {
 
     public void onClickButtonSignIn(View v)
     {
+        /*
+         * Grab the user submitted Email and Password, pass them off to the AccountManager which
+         * will validate it with AWS Cognito.
+         */
         mEmail = mEditTextEmail.getText().toString();
         mPassword = mEditTextPassword.getText().toString();
 
@@ -83,10 +92,16 @@ public class LogInActivity extends AppCompatActivity {
 
     public void onClickButtonCreateAccount(View v)
     {
-            Intent intent = new Intent(
+        /*
+         * For this routine, we leverage AWS Cognito's automatically generated web page for
+         * registering users. All we need to do is generate an Intent to open the URL. The AWS
+         * Cognito web page is designed to return us back to the LogInActivity app view once the
+         * user is done signing up.
+         */
+        Intent intent = new Intent(
                     Intent.ACTION_VIEW,
                     Uri.parse(mAccountManager.getAccountCreateURL()));
 
-            startActivity(intent);
+        startActivity(intent);
     }
 }

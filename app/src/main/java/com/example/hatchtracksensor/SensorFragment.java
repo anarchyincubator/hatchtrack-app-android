@@ -20,8 +20,6 @@ import java.util.TimeZone;
 
 public class SensorFragment extends Fragment {
 
-    public static final String PEEP_MANAGER_KEY = "PEEP_MANAGER";
-
     private TextView mTextViewTimeUpdate;
     private TextView mTextViewTemperature;
     private TextView mTextViewHumidity;
@@ -30,10 +28,15 @@ public class SensorFragment extends Fragment {
     private PeepManager mPeepManager;
     private SettingsManager mSettingsManager;
 
+    // URL to our InfluxDB instance. Port 8086 is used for SSL communication to the database.
     private static final String mDbURL = "https://db.hatchtrack.com:8086";
+    // User we will use to make queries to the database. Note: This user only has READ access.
     private static final String mDbUser = "reader";
+    // Password for "reader" user. Keep this secret.
     private static final String mDbPassword = "B5FX6jIhXz0kbBxE";
+    // This is the database holding our time series Peep data.
     private static final String mDbName = "peep0";
+    // Poll the database for new data at the provided time interval.
     private final static int mDbPollInterval = 1000 * 60 * 1; // 1 minute
     private InfluxClient mInfluxClient;
 
@@ -126,6 +129,7 @@ public class SensorFragment extends Fragment {
                             SettingsManager.TemperatureUnits.FAHRENHEIT;
                     SettingsManager.TemperatureUnits units = mSettingsManager.getTemperatureUnits();
 
+                    // Display Temperature value in the user specified units.
                     if (CELSIUS == units) {
                         fmt = String.format(
                                 Locale.US,
@@ -140,14 +144,17 @@ public class SensorFragment extends Fragment {
                     }
                     mTextViewTemperature.setText(fmt);
 
+                    // Convert InfluxDB UTC times to the local time of the user.
                     fmt = String.format(
                             Locale.US, "%.1f",
                             influxMeasurement.humidity) + " %";
                     mTextViewHumidity.setText(fmt);
 
+                    // ISO 8601 time representation.
                     DateFormat isoTimestamp = new SimpleDateFormat(
                             "yyyy-MM-dd'T'HH:mm:ss'Z'",
                             Locale.ENGLISH);
+                    // User readable time representation.
                     DateFormat userTimestamp = new SimpleDateFormat(
                             "MMM dd, yyyy HH:mm a",
                             Locale.ENGLISH);
@@ -156,8 +163,8 @@ public class SensorFragment extends Fragment {
                     userTimestamp.setTimeZone(TimeZone.getDefault());
                     Date date = isoTimestamp.parse(influxMeasurement.timestamp);
                     String localTime = userTimestamp.format(date);
-
-                    mTextViewTimeUpdate.setText("Last Updated: " + localTime);
+                    String text = "Last Updated: " + localTime;
+                    mTextViewTimeUpdate.setText(text);
                 }
                 catch (Exception e) {
                     e.printStackTrace();

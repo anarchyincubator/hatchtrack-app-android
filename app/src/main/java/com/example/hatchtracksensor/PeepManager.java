@@ -35,6 +35,10 @@ public class PeepManager {
 
     public PeepManager() {
         if (mPeepList.isEmpty()) {
+            /*
+             * TODO: Create database the holds user's Peeps. For now, we just grab the two Peeps
+             * TODO: that are configured for our demo purposes.
+             */
             mActivePeepIndex = 0;
 
             mPeepList.add(

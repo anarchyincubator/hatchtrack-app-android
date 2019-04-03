@@ -19,8 +19,10 @@ public class AccountManager {
     private static CognitoUserPool mUserPool = null;
     private AccountManagerCallback mAccountManagerCallback;
 
+    // Private data storage for our app used to cache the user's Email and Password.
     private static SharedPreferences mSharedPreferences;
 
+    // These values are obtained from AWS Cognito User Pool details on the Web Console.
     private static final String mSignUpURL = "https://hatchtrack.auth.us-west-2.amazoncognito.com/signup?response_type=token&client_id=34uo31crc6dbm4i11sgaqv03lb&redirect_uri=hatchtrack.sensor://main";
     private static String mUserPoolId = "us-west-2_wOcu7aBMM";
     private static String mClientId = "34uo31crc6dbm4i11sgaqv03lb";
@@ -31,6 +33,7 @@ public class AccountManager {
 
     public AccountManager(android.content.Context context) {
         if (null == mUserPool) {
+            // Only initialize once since most all data in this class is static.
             mUserPool = new CognitoUserPool(
                     context,
                     mUserPoolId,
@@ -42,6 +45,7 @@ public class AccountManager {
                     "UserData",
                     context.MODE_PRIVATE);
 
+            // Grab the cached values.
             mEmail = mSharedPreferences.getString("email","");
             mPassword = mSharedPreferences.getString("password","");
         }
@@ -51,6 +55,7 @@ public class AccountManager {
         mEmail = email;
         mPassword = password;
 
+        // Cache the values.
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         editor.putString("email", mEmail);
         editor.putString("password", mPassword);
@@ -66,6 +71,10 @@ public class AccountManager {
     }
 
     public void startAuth(AccountManagerCallback accountManagerCallback) {
+        /*
+         * Begin authorization process with AWS Cognito. On either success or failure, use the
+         * functions provided in AccountManagerCallback to inform the callee.
+         */
         mAccountManagerCallback = accountManagerCallback;
 
         CognitoUser user = mUserPool.getUser(mEmail);
@@ -78,6 +87,8 @@ public class AccountManager {
 
     private AuthenticationHandler authenticationHandler = new AuthenticationHandler()
     {
+        // Functions called by AWS Cognito during the account log in process.
+
         @Override
         public void onSuccess(final CognitoUserSession userSession, final CognitoDevice newDevice)
         {

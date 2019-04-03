@@ -1,6 +1,5 @@
 package com.example.hatchtracksensor;
 
-import android.util.Log;
 import com.amazonaws.util.IOUtils;
 
 import org.json.JSONArray;
@@ -42,6 +41,10 @@ public class InfluxClient {
         InfluxMeasurement influxMeasurement = null;
 
         try {
+            /*
+             * Reference the InfluxQL documentation page for info regarding how to make queries.
+             * For this routine, we just grab the last recorded value for a given Peep UUID.
+             */
             String influxQuery = "";
             String uriQuery = "";
 
@@ -49,6 +52,9 @@ public class InfluxClient {
             influxQuery += "WHERE peep_uuid='" + uuid + "' ";
             influxQuery += "GROUP BY * ORDER BY DESC LIMIT 1";
 
+            /*
+             * Note: We're doing this request over SSL, so no worries about credentials leaking.
+             */
             uriQuery += "?u=" + mUser;
             uriQuery += "&p=" + mPassword;
             uriQuery += "&db=" + mdbName;

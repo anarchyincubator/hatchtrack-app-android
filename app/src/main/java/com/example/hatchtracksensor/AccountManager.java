@@ -1,10 +1,7 @@
 package com.example.hatchtracksensor;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.util.Log;
-import android.view.View;
 
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoDevice;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
@@ -20,9 +17,9 @@ import com.amazonaws.regions.Regions;
 public class AccountManager {
 
     private static CognitoUserPool mUserPool = null;
-    private MyInterface mMyInterface;
+    private AccountManagerCallback mAccountManagerCallback;
 
-    private SharedPreferences mSharedPreferences;
+    private static SharedPreferences mSharedPreferences;
 
     private static final String mSignUpURL = "https://hatchtrack.auth.us-west-2.amazoncognito.com/signup?response_type=token&client_id=34uo31crc6dbm4i11sgaqv03lb&redirect_uri=hatchtrack.sensor://main";
     private static String mUserPoolId = "us-west-2_wOcu7aBMM";
@@ -68,8 +65,8 @@ public class AccountManager {
         return mPassword;
     }
 
-    public void startAuth(MyInterface myInterface) {
-        mMyInterface = myInterface;
+    public void startAuth(AccountManagerCallback accountManagerCallback) {
+        mAccountManagerCallback = accountManagerCallback;
 
         CognitoUser user = mUserPool.getUser(mEmail);
         user.getSessionInBackground(authenticationHandler);
@@ -86,7 +83,7 @@ public class AccountManager {
         {
             // Login success, do startActivity() or other thing
             Log.i("auth","Login success");
-            mMyInterface.onSuccess(mEmail);
+            mAccountManagerCallback.onSuccess(mEmail);
         }
 
         @Override
@@ -123,7 +120,7 @@ public class AccountManager {
         public void onFailure(final Exception exception)
         {
             Log.i("auth","Login failure");
-            mMyInterface.onFailure(mPassword);
+            mAccountManagerCallback.onFailure(mPassword);
         }
     };
 }

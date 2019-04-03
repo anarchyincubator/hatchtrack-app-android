@@ -1,8 +1,6 @@
 package com.example.hatchtracksensor;
 
-//MyInterface.java
-
-public interface MyInterface
+public interface AccountManagerCallback
 {
     void onSuccess(String response);
     void onFailure(String response);

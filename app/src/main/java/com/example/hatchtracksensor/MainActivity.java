@@ -71,8 +71,8 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.navIncubationGuide) {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://hatchtrack.com"));
             startActivity(intent);
-        } else if (id == R.id.navSupportForum) {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://hatchtrack.com"));
+        } else if (id == R.id.navCommunityForum) {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://community.hatchtrack.com"));
             startActivity(intent);
         } else if (id == R.id.navBuyEggs) {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://classifieds.hatchtrack.com/chicken-eggs"));

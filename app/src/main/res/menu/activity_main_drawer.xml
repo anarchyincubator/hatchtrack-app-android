@@ -29,9 +29,9 @@
                 android:icon="@drawable/ic_document"
                 android:title="Incubation Guide" />
             <item
-                android:id="@+id/navSupportForum"
+                android:id="@+id/navCommunityForum"
                 android:icon="@drawable/ic_live_help_black_24dp"
-                android:title="Support Forum" />
+                android:title="Community Forum" />
             <item
                 android:id="@+id/navBuyEggs"
                 android:icon="@drawable/ic_shopping_cart"

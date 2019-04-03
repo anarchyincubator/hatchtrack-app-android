@@ -62,7 +62,7 @@ public class LogInActivity extends AppCompatActivity {
         mButtonCreateAccount.setEnabled(false);
 
         mAccountManager.setEmailPassword(mEmail, mPassword);
-        mAccountManager.startAuth(new MyInterface() {
+        mAccountManager.startAuth(new AccountManagerCallback() {
             @Override
             public void onSuccess(String response) {
                 mButtonSignIn.setText("Signed In!");

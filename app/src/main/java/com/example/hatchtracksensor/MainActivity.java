@@ -69,13 +69,17 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(MainActivity.this, LogInActivity.class);
             startActivity(intent);
         } else if (id == R.id.navIncubationGuide) {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://hatchtrack.com"));
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://chickens.wangahrah.com/incubation-101"));
             startActivity(intent);
         } else if (id == R.id.navCommunityForum) {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://community.hatchtrack.com"));
             startActivity(intent);
         } else if (id == R.id.navBuyEggs) {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://classifieds.hatchtrack.com/chicken-eggs"));
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://classifieds.hatchtrack.com"));
+            startActivity(intent);
+        }
+        else if (id == R.id.navHatchtrackStore) {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://shop.hatchtrack.com"));
             startActivity(intent);
         }
 

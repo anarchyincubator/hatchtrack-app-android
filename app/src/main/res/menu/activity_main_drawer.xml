@@ -36,6 +36,10 @@
                 android:id="@+id/navBuyEggs"
                 android:icon="@drawable/ic_shopping_cart"
                 android:title="Buy Eggs" />
+            <item
+                android:id="@+id/navHatchtrackStore"
+                android:icon="@drawable/ic_hatchtrack_icon_black"
+                android:title="Hatchtrack Store" />
         </menu>
     </item>
 

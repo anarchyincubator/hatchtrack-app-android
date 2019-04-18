@@ -62,10 +62,10 @@ public class InfluxClient {
 
             String u = mdbURL + "/query" + uriQuery;
             URL url = new URL(u);
-            HttpURLConnection urlConnection  = (HttpURLConnection) url.openConnection();
-            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+            HttpURLConnection conn  = (HttpURLConnection) url.openConnection();
+            InputStream in = new BufferedInputStream(conn.getInputStream());
             influxMeasurement = parseJSONToMeasurement(in);
-            urlConnection.disconnect();
+            conn.disconnect();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -113,7 +113,6 @@ public class InfluxClient {
             JSONObject reader = new JSONObject(data);
             JSONArray results = reader.getJSONArray("results");
             JSONObject object;
-            String test;
 
             for (int i = 0; i < results.length(); i++) {
                 object = results.getJSONObject(i);

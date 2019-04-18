@@ -38,7 +38,7 @@ public class PeepSelectFragment extends Fragment {
     public void onActivityCreated(Bundle bundle) {
         super.onActivityCreated(bundle);
 
-        mPeepManager = new PeepManager();
+        mPeepManager = new PeepManager("test@widgt.ninja");
 
         // data to populate the RecyclerView with
         ArrayList<String> peepNames = new ArrayList<>(Arrays.asList(mPeepManager.getPeepNames()));

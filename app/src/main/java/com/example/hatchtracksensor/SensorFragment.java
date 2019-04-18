@@ -69,7 +69,7 @@ public class SensorFragment extends Fragment {
     public void onActivityCreated(Bundle bundle) {
         super.onActivityCreated(bundle);
 
-        mPeepManager = new PeepManager();
+        mPeepManager = new PeepManager("test@widgt.ninja");
         mSettingsManager = new SettingsManager();
         PeepManager.PeepUnit peep = mPeepManager.getPeepUnitActive();
 

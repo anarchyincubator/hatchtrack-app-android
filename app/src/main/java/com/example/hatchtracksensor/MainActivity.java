@@ -16,9 +16,6 @@ import android.view.MenuItem;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-
-    private PeepManager mPeepManager;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,9 +36,7 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        mPeepManager = new PeepManager("test@widgt.ninja");
-
-        Fragment fragment = new SensorFragment();;
+        Fragment fragment = new PeepDatabaseSyncFragment();
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.replace(R.id.content_view, fragment);
         ft.commit();

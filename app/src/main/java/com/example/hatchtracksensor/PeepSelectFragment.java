@@ -8,15 +8,13 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class PeepSelectFragment extends Fragment {
 
-    private PeepManager mPeepManager;
+    private PeepUnitManager mPeepUnitManager;
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
@@ -38,10 +36,10 @@ public class PeepSelectFragment extends Fragment {
     public void onActivityCreated(Bundle bundle) {
         super.onActivityCreated(bundle);
 
-        mPeepManager = new PeepManager("test@widgt.ninja");
+        mPeepUnitManager = new PeepUnitManager();
 
         // data to populate the RecyclerView with
-        ArrayList<String> peepNames = new ArrayList<>(Arrays.asList(mPeepManager.getPeepNames()));
+        ArrayList<String> peepNames = new ArrayList<>(Arrays.asList(mPeepUnitManager.getPeepNames()));
         //peepNames.add("Peep 1");
         //peepNames.add("Peep 2");
 
@@ -53,7 +51,7 @@ public class PeepSelectFragment extends Fragment {
                 new MyRecyclerViewAdapter.ItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                        mPeepManager.setPeepUnitActive(position);
+                        mPeepUnitManager.setPeepUnitActive(position);
 
                         Fragment fragment = new SensorFragment();
                         FragmentTransaction ft = getFragmentManager().beginTransaction();

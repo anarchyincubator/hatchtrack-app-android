@@ -1,7 +1,13 @@
 package com.example.hatchtracksensor;
 
+import android.app.FragmentTransaction;
 import android.os.AsyncTask;
+import android.os.Bundle;
+import android.app.Fragment;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.amazonaws.util.IOUtils;
 
@@ -17,107 +23,33 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class PeepManager {
+public class PeepDatabaseSyncFragment extends Fragment {
 
-    private static ArrayList<PeepUnit> mPeepList = new ArrayList<PeepUnit>();
-    private static int mActivePeepIndex = 0;
-    private static String mUserEmail;
-    private static DatabaseJob mJob;
+    private  DbSyncJob mJob;
 
-    public class PeepUnit {
-        private String mName;
-        private String mUUID;
-
-        public PeepUnit(String uuid, String name) {
-            mUUID = uuid;
-            mName = name;
-        }
-
-        public String getName() {
-            return mName;
-        }
-
-        public String getUUID() {
-            return mUUID;
-        }
-
-        public void setName(String name) {
-            mName = name;
-        }
-
-        public void setUUID(String uuid) {
-            mUUID = uuid;
-        }
+    public PeepDatabaseSyncFragment() {
+        // Required empty public constructor
     }
 
-    public PeepManager(String userEmail) {
-        if (mPeepList.isEmpty()) {
-            /*
-             * TODO: Create database the holds user's Peeps. For now, we just grab the two Peeps
-             * TODO: that are configured for our demo purposes.
-             */
-            mActivePeepIndex = 0;
-
-            mPeepList.add(
-                   new PeepUnit("425e11b3-5844-4626-b05a-219d9751e5ca", "Peep 1"));
-            mPeepList.add(
-                  new PeepUnit("86559e4a-c115-4412-a8b3-b0f54486a18c", "Peep 2"));
-
-            mJob = new DatabaseJob();
-            mJob.execute(DatabaseJobTask.QUERY_PEEPS);
-        }
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_peep_database_sync, container, false);
     }
 
-    public String[] getPeepNames() {
-        String names[] = new String[mPeepList.size()];
-        PeepUnit unit;
+    @Override
+    public void onActivityCreated(Bundle bundle) {
+        super.onActivityCreated(bundle);
 
-        for (int i = 0; i < mPeepList.size(); i++) {
-            unit = mPeepList.get(i);
-            names[i] = unit.getName();
-        }
-
-        return names;
+        mJob = new DbSyncJob();
+        mJob.execute("test@widgt.ninja");
     }
 
-    public PeepUnit[] getPeepUnits() {
-        PeepUnit units[] = new PeepUnit[mPeepList.size()];
-        PeepUnit unit;
-
-        for (int i = 0; i < mPeepList.size(); i++) {
-            unit = mPeepList.get(i);
-            units[i].setName(unit.getName());
-            units[i].setUUID(unit.getUUID());
-        }
-
-        return units;
-    }
-
-    public int getPeepUnitCount() {
-        return mPeepList.size();
-    }
-
-    public void setPeepUnitActive(int i) {
-        if ((i >= 0) && (i < mPeepList.size())) {
-            mActivePeepIndex = i;
-        }
-    }
-
-    public PeepUnit getPeepUnitActive() {
-        PeepUnit unit = mPeepList.get(mActivePeepIndex);
-        return unit;
-    }
-
-
-    public enum DatabaseJobTask {
-        QUERY_PEEPS,
-    }
-
-    private class DatabaseJob extends AsyncTask<DatabaseJobTask, Void,ArrayList<PeepUnit>> {
-
+    private class DbSyncJob extends AsyncTask<String, Void, ArrayList<PeepUnit> > {
         private final String HEADER_ACCESS_TOKEN = "access-token";
 
-        protected  String  getAccessToken() {
+        protected  String  getAccessToken(String email) {
             String accessToken = "";
             try {
                 String body =  "{\"email\": \"test@widgt.ninja\", \"password\": \"blaggg\" }";
@@ -132,8 +64,7 @@ public class PeepManager {
                 conn.setDoOutput(true);
 
                 OutputStream out = conn.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(
-                        new OutputStreamWriter(out, "UTF-8"));
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
                 writer.write(body);
 
                 writer.flush();
@@ -165,9 +96,9 @@ public class PeepManager {
                 conn.setDoInput(true);
 
                 InputStream in = new BufferedInputStream(conn.getInputStream());
-               String  data= IOUtils.toString(in);
-               JSONObject json = new JSONObject(data);
-               JSONArray array = json.getJSONArray("peep_uuids");
+                String  data= IOUtils.toString(in);
+                JSONObject json = new JSONObject(data);
+                JSONArray array = json.getJSONArray("peep_uuids");
                 for (int i = 0; i < array.length(); i++) {
                     list.add(array.getString(i));
                 }
@@ -204,30 +135,36 @@ public class PeepManager {
         }
 
         @Override
-        protected  ArrayList<PeepUnit> doInBackground(DatabaseJobTask... tasks) {
+        protected ArrayList<PeepUnit>  doInBackground(String... emails) {
             ArrayList<PeepUnit> peepUnits = new ArrayList<PeepUnit>();
-            ArrayList<String> uuids;
-            String name;
-            String accessToken = getAccessToken();
+            String email = emails[0];
 
-            for (int i = 0; i < tasks.length; i++) {
-                switch(tasks[i]) {
-                    case QUERY_PEEPS:
-                        uuids = getPeepUUIDs(accessToken);
-                        for (int j = 0; j < uuids.size(); j++) {
-                            name = getPeepName(accessToken, uuids.get(j));
-                            peepUnits.add(new PeepUnit(uuids.get(j), name));
-                        }
-                        break;
-                }
+            String accessToken = getAccessToken(email);
+            ArrayList<String> uuids = getPeepUUIDs(accessToken);
+            String name  = "";
+            for (int j = 0; j < uuids.size(); j++) {
+                name = getPeepName(accessToken, uuids.get(j));
+                peepUnits.add(new PeepUnit(uuids.get(j), name));
             }
 
             return peepUnits;
         }
 
         @Override
-        protected void onPostExecute(ArrayList<PeepUnit> peepUnits) {
-            Log.d("MREUTMAN", "done!");
+        protected void onPostExecute(ArrayList<PeepUnit>  peepUnits) {
+            if (peepUnits.size() != 0) {
+
+                PeepUnitManager peepUnitManager = new PeepUnitManager();
+                peepUnitManager.setPeepUnits(peepUnits);
+
+                Fragment fragment = new SensorFragment();
+                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                ft.replace(R.id.content_view, fragment);
+                ft.commit();
+            }
+            else {
+                Log.d("MREUTMAN", "TODO: fill this in");
+            }
         }
     }
 }

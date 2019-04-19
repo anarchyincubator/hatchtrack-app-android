@@ -25,7 +25,7 @@ public class SensorFragment extends Fragment {
     private TextView mTextViewHumidity;
     private Button mButtonPeepSelect;
 
-    private PeepManager mPeepManager;
+    private PeepUnitManager mPeepUnitManager;
     private SettingsManager mSettingsManager;
 
     // URL to our InfluxDB instance. Port 8086 is used for SSL communication to the database.
@@ -44,7 +44,7 @@ public class SensorFragment extends Fragment {
     private Runnable mHandlerTask = new Runnable() {
         @Override
         public void run() {
-            PeepManager.PeepUnit peep = mPeepManager.getPeepUnitActive();
+            PeepUnit peep = mPeepUnitManager.getPeepUnitActive();
 
             mButtonPeepSelect.setText(peep.getName());
             SensorUpdateJob sensorUpdateJob = new SensorUpdateJob();
@@ -69,9 +69,9 @@ public class SensorFragment extends Fragment {
     public void onActivityCreated(Bundle bundle) {
         super.onActivityCreated(bundle);
 
-        mPeepManager = new PeepManager("test@widgt.ninja");
+        mPeepUnitManager = new PeepUnitManager();
         mSettingsManager = new SettingsManager();
-        PeepManager.PeepUnit peep = mPeepManager.getPeepUnitActive();
+        PeepUnit peep = mPeepUnitManager.getPeepUnitActive();
 
         mTextViewTimeUpdate = getView().findViewById(R.id.textViewTimeUpdate);
         mTextViewTemperature = getView().findViewById(R.id.textViewTemperature);

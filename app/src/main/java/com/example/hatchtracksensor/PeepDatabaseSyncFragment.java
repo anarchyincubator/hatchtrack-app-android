@@ -25,6 +25,9 @@ import java.util.ArrayList;
 
 public class PeepDatabaseSyncFragment extends Fragment {
 
+    static public final int DATABASE_TO_APP_SYNC = 0;
+    static public final int APP_TO_DATABASE_SYNC = 1;
+    private  int mCommand = 0;
     private  DbSyncJob mJob;
 
     public PeepDatabaseSyncFragment() {
@@ -34,6 +37,14 @@ public class PeepDatabaseSyncFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        try {
+            mCommand = this.getArguments().getInt("command");
+        }
+        catch (Exception e) {
+            mCommand = DATABASE_TO_APP_SYNC;
+        }
+
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_peep_database_sync, container, false);
     }
@@ -42,8 +53,18 @@ public class PeepDatabaseSyncFragment extends Fragment {
     public void onActivityCreated(Bundle bundle) {
         super.onActivityCreated(bundle);
 
-        mJob = new DbSyncJob();
-        mJob.execute("test@widgt.ninja");
+        if (DATABASE_TO_APP_SYNC == mCommand) {
+            AccountManager accountManager = new AccountManager(getContext());
+
+            mJob = new DbSyncJob();
+            mJob.execute(accountManager.getEmail());
+        }
+        else if (APP_TO_DATABASE_SYNC == mCommand) {
+            Log.e("MREUTMAN", "ooops");
+        }
+        else {
+            Log.e("MREUTMAN", "you died");
+        }
     }
 
     private class DbSyncJob extends AsyncTask<String, Void, ArrayList<PeepUnit> > {

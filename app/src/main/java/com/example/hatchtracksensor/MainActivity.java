@@ -37,6 +37,9 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         Fragment fragment = new PeepDatabaseSyncFragment();
+        Bundle args = new Bundle();
+        args.putInt("command", ((PeepDatabaseSyncFragment) fragment).DATABASE_TO_APP_SYNC);
+        fragment.setArguments(args);
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.replace(R.id.content_view, fragment);
         ft.commit();

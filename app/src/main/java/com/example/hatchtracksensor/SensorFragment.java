@@ -83,6 +83,7 @@ public class SensorFragment extends Fragment {
                 Fragment fragment = new PeepSelectFragment();
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
                 ft.replace(R.id.content_view, fragment);
+                ft.addToBackStack(null);
                 ft.commit();
             }
         });

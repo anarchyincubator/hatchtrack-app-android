@@ -26,7 +26,9 @@
         <item>Celsius (℃)</item>
     </string-array>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="text_view_sync_status">Synchronizing with database...</string>
+    <string name="button_scan">Scan</string>
+    <string name="edit_text_wifi_ssid">SSID</string>
+    <string name="text_view_ble_config_wifi_title">WiFi Credentials</string>
+    <string name="text_view_ble_wifi_config_status">Scan for Peep...</string>
 </resources>

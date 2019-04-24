@@ -3,6 +3,7 @@ package com.example.hatchtracksensor;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -16,6 +17,7 @@ public class PeepSelectFragment extends Fragment {
 
     private PeepUnitManager mPeepUnitManager;
 
+    private FloatingActionButton mAddPeep;
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private LinearLayoutManager layoutManager;
@@ -36,12 +38,22 @@ public class PeepSelectFragment extends Fragment {
     public void onActivityCreated(Bundle bundle) {
         super.onActivityCreated(bundle);
 
-        mPeepUnitManager = new PeepUnitManager();
+        mAddPeep = getView().findViewById(R.id.floatingActionButtonAddPeep);
+        mAddPeep.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Fragment fragment = new BluetoothFragment();
+                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                ft.replace(R.id.content_view, fragment);
+                ft.addToBackStack(null);
+                ft.commit();
+            }
+        });
 
+
+        mPeepUnitManager = new PeepUnitManager();
         // data to populate the RecyclerView with
         ArrayList<String> peepNames = new ArrayList<>(Arrays.asList(mPeepUnitManager.getPeepNames()));
-        //peepNames.add("Peep 1");
-        //peepNames.add("Peep 2");
 
         // set up the RecyclerView
         mRecyclerView = getView().findViewById(R.id.recyclerViewPeepSelect);

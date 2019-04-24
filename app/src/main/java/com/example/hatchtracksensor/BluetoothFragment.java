@@ -16,6 +16,7 @@ import android.bluetooth.le.ScanResult;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.os.Handler;
@@ -24,34 +25,92 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import org.json.JSONObject;
 
 import java.util.UUID;
 
+import static com.amazonaws.mobile.auth.core.internal.util.ThreadUtils.runOnUiThread;
+
 public class BluetoothFragment extends Fragment {
 
     private Button mButtonScan = null;
 
-    private static final String SERVICE_UUID_STR = "e7f9840b-d767-4169-a3d0-a83b083669df";
-    private static final String CHARACTERISTIC_UUID_STR = "8bdc835c-10fe-407f-afb0-b21926f068a7";
+    private static final String PEEP_DEVICE_NAME_STR = "ESP32";
+    private static final String PEEP_SERVICE_UUID_STR = "e7f9840b-d767-4169-a3d0-a83b083669df";
+    private static final String PEEP_CHARACTERISTIC_UUID_STR = "8bdc835c-10fe-407f-afb0-b21926f068a7";
     private static final long SCAN_PERIOD_MS = 10000;
     private static final int REQUEST_ENABLE_BT = 1;
-    private  static final int REQUEST_COARSE_LOCATION = 2;
+    private static final int REQUEST_COARSE_LOCATION = 2;
     private static final String TAG = "MREUTMAN";
+    private final static int TASK_POLL_INTERVAL_MS = 500;
 
+    private EditText mEditTextWiFiSSID;
+    private EditText mEditTextPassword;
+    private TextView mTextViewTitle;
+    private TextView mTextViewStatus;
     private ProgressBar mSpinner;
 
     private BluetoothAdapter mBluetoothAdapter = null;
     private BluetoothLeScanner mBluetoothLeScanner = null;
     private BluetoothDevice mBluetoothDevice = null;
-    private Handler mHandler = null;
-    private  boolean mIsScanning = false;
+    private BluetoothGatt mBluetoothGatt = null;
+    private BluetoothGattCharacteristic mBluetoothGattCharacteristic = null;
+    private Handler mScanHandler = null;
+    private boolean mIsScanning = false;
     private String mPeepUUID = "";
+
+    private void UiUpdate() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (mIsScanning) {
+                    mSpinner.setVisibility(View.VISIBLE);
+                    mButtonScan.setEnabled(false);
+                    mEditTextWiFiSSID.setEnabled(false);
+                    mEditTextPassword.setEnabled(false);
+                    mEditTextWiFiSSID.setVisibility(View.INVISIBLE);
+                    mEditTextPassword.setVisibility(View.INVISIBLE);
+                    mTextViewTitle.setVisibility(View.INVISIBLE);
+                }
+                else if (null == mBluetoothDevice) {
+                    mSpinner.setVisibility(View.GONE);
+                    mButtonScan.setText("Scan");
+                    mButtonScan.setEnabled(true);
+                }
+                else if ((null != mPeepUUID) && (!mPeepUUID.isEmpty())) {
+                    mTextViewStatus.setText("Peep: " + mPeepUUID);
+
+                    if (mBluetoothGattCharacteristic != null) {
+                        mEditTextWiFiSSID.setVisibility(View.VISIBLE);
+                        mEditTextPassword.setVisibility(View.VISIBLE);
+                        mTextViewTitle.setVisibility(View.VISIBLE);
+                        mSpinner.setVisibility(View.GONE);
+                        mButtonScan.setText("Configure");
+                        mButtonScan.setEnabled(true);
+                        mEditTextWiFiSSID.setEnabled(true);
+                        mEditTextPassword.setEnabled(true);
+                    }
+                }
+            }
+        });
+    }
 
     // Various callback methods defined by the BLE API.
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
+
+            private void onError(BluetoothGatt gatt) {
+                gatt.disconnect();
+                mPeepUUID = null;
+                mBluetoothDevice = null;
+                mBluetoothGatt = null;
+                mBluetoothGattCharacteristic = null;
+                UiUpdate();
+            }
+
             @Override
             public void onConnectionStateChange(BluetoothGatt gatt, int status,
                                                 int newState) {
@@ -67,7 +126,7 @@ public class BluetoothFragment extends Fragment {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     gatt.discoverServices();
                 } else {
-                    gatt.disconnect();
+                    onError(gatt);
                 }
             }
 
@@ -77,17 +136,17 @@ public class BluetoothFragment extends Fragment {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     Log.i(TAG, "onServicesDiscovered received: " + status);
                     BluetoothGattService service = gatt.getService(
-                            UUID.fromString(SERVICE_UUID_STR));
+                            UUID.fromString(PEEP_SERVICE_UUID_STR));
                     if (null != service) {
                         BluetoothGattCharacteristic characteristic = service.getCharacteristic(
-                                UUID.fromString(CHARACTERISTIC_UUID_STR));
+                                UUID.fromString(PEEP_CHARACTERISTIC_UUID_STR));
                         if (null != characteristic) {
                             gatt.readCharacteristic(characteristic);
                         } else {
-                            gatt.disconnect();
+                            onError(gatt);
                         }
                     } else {
-                        gatt.disconnect();
+                        onError(gatt);
                     }
                 } else {
                     Log.w(TAG, "onServicesDiscovered received: " + status);
@@ -106,11 +165,12 @@ public class BluetoothFragment extends Fragment {
                     try {
                         JSONObject jsonObject = new JSONObject(res);
                         mPeepUUID = jsonObject.getString("uuid");
-                        //characteristic.setValue("blah blah blah");
-                        //gatt.writeCharacteristic(characteristic)
+                        mBluetoothGatt = gatt;
+                        mBluetoothGattCharacteristic = characteristic;
+                        UiUpdate();
                     }
                     catch (Exception e) {
-                        gatt.disconnect();
+                        onError(gatt);
                     }
                 }
             }
@@ -131,9 +191,9 @@ public class BluetoothFragment extends Fragment {
         public void onScanResult(int callbackType, ScanResult result) {
             BluetoothDevice device = result.getDevice();
             String name = device.getName();
-            Log.i("MREUTMAN", "Device Name: " + name + " rssi: " + result.getRssi() + "\n");
+            Log.i(TAG, "Device Name: " + name + " rssi: " + result.getRssi() + "\n");
 
-            if ((null != name) && (name.contains("ESP32"))) {
+            if ((null != name) && (name.contains(PEEP_DEVICE_NAME_STR))) {
                 mBluetoothDevice = device;
             }
         }
@@ -142,13 +202,12 @@ public class BluetoothFragment extends Fragment {
     private void scanLeDevice(final boolean enable) {
         if (enable) {
             // Stops scanning after a pre-defined scan period.
-            mHandler.postDelayed(new Runnable() {
+            mScanHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     mBluetoothLeScanner.stopScan(mLeScanCallback);
-
+                    scanLeDevice(false);
                     if (null != mBluetoothDevice) {
-                        mButtonScan.setText("Configure");
                         Context context = getContext();
                         mBluetoothDevice.connectGatt(context, true, mGattCallback);
                     }
@@ -156,15 +215,13 @@ public class BluetoothFragment extends Fragment {
             }, SCAN_PERIOD_MS);
 
             mIsScanning = true;
-            mSpinner.setVisibility(View.VISIBLE);
-            mButtonScan.setEnabled(false);
             mBluetoothLeScanner.startScan(mLeScanCallback);
         } else {
             mIsScanning = false;
-            mSpinner.setVisibility(View.GONE);
-            mButtonScan.setEnabled(true);
             mBluetoothLeScanner.stopScan(mLeScanCallback);
         }
+
+        UiUpdate();
     }
 
     public BluetoothFragment() {
@@ -185,11 +242,20 @@ public class BluetoothFragment extends Fragment {
         Activity activity = getActivity();
         Context context = getContext();
 
+        mButtonScan = activity.findViewById(R.id.buttonScan);
+        mEditTextWiFiSSID = activity.findViewById(R.id.editTextWiFiSsid);
+        mEditTextPassword = activity.findViewById(R.id.editTextWiFiPassword);
+        mTextViewStatus = activity.findViewById(R.id.textViewBleConfigStatus);
+        mTextViewTitle = activity.findViewById(R.id.textViewBleConfigTitle);
         mSpinner = activity.findViewById(R.id.progressBarScan);
         mSpinner.setVisibility(View.GONE);
 
-        mButtonScan = activity.findViewById(R.id.buttonScan);
+        mEditTextWiFiSSID.setEnabled(false);
+        mEditTextPassword.setEnabled(false);
         mButtonScan.setEnabled(false);
+        mEditTextWiFiSSID.setVisibility(View.INVISIBLE);
+        mEditTextPassword.setVisibility(View.INVISIBLE);
+        mTextViewTitle.setVisibility(View.INVISIBLE);
         // Use this check to determine whether BLE is supported on the device. Then
         // you can selectively disable BLE-related features.
         PackageManager packageManager = getActivity().getPackageManager();
@@ -200,7 +266,7 @@ public class BluetoothFragment extends Fragment {
                     (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
             mBluetoothAdapter = bluetoothManager.getAdapter();
             mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
-            mHandler = new Handler();
+            mScanHandler = new Handler();
 
             // Ensures Bluetooth is available on the device and it is enabled. If not,
             // displays a dialog requesting user permission to enable Bluetooth.
@@ -222,10 +288,17 @@ public class BluetoothFragment extends Fragment {
             mButtonScan.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if ((null == mPeepUUID) || (mPeepUUID.isEmpty())) {
+                    if ((null == mBluetoothDevice) || (null == mPeepUUID) || (mPeepUUID.isEmpty())) {
                         scanLeDevice(true);
                     } else {
+                        String ssid = mEditTextWiFiSSID.getText().toString();
+                        String pass = mEditTextPassword.getText().toString();
 
+                        String value =
+                                "{\"wifiSSID\" : \"" + ssid +
+                                "\",\"wifiPassword\" : \"" + pass + "\"}";
+                        mBluetoothGattCharacteristic.setValue(value);
+                        mBluetoothGatt.writeCharacteristic(mBluetoothGattCharacteristic);
                     }
                 }
             });

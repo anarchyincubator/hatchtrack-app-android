@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,7 +58,10 @@ public class PeepDatabaseSyncFragment extends Fragment {
             AccountManager accountManager = new AccountManager(getContext());
 
             mJob = new DbSyncJob();
-            mJob.execute(accountManager.getEmail());
+            String email = accountManager.getEmail();
+            String password = accountManager.getPassword();
+            Pair<String, String> pair = new Pair<>(email, password);
+            mJob.execute(pair);
         }
         else if (APP_TO_DATABASE_SYNC == mCommand) {
             Log.e("MREUTMAN", "ooops");
@@ -67,13 +71,17 @@ public class PeepDatabaseSyncFragment extends Fragment {
         }
     }
 
-    private class DbSyncJob extends AsyncTask<String, Void, ArrayList<PeepUnit> > {
+    private class DbSyncJob extends AsyncTask<Pair<String, String>, Void, ArrayList<PeepUnit> > {
         private final String HEADER_ACCESS_TOKEN = "access-token";
 
-        protected  String  getAccessToken(String email) {
+        protected  String  getAccessToken(String email, String password) {
             String accessToken = "";
             try {
-                String body =  "{\"email\": \"test@widgt.ninja\", \"password\": \"blaggg\" }";
+                JSONObject json = new JSONObject();
+                json.put("email", email);
+                json.put("password", password);
+
+                String body = json.toString();
                 String requestURL = "https://db.hatchtrack.com:18888/auth";
                 URL url = new URL(requestURL);
 
@@ -94,7 +102,7 @@ public class PeepDatabaseSyncFragment extends Fragment {
 
                 InputStream in = new BufferedInputStream(conn.getInputStream());
                 String data = IOUtils.toString(in);
-                JSONObject json = new JSONObject(data);
+                json = new JSONObject(data);
                 accessToken = json.getString("access-token");
             } catch (Exception e) {
                 e.printStackTrace();
@@ -103,10 +111,10 @@ public class PeepDatabaseSyncFragment extends Fragment {
             return accessToken;
         }
 
-        protected ArrayList<String>  getPeepUUIDs(String accessToken) {
+        protected ArrayList<String>  getPeepUUIDs(String accessToken, String email) {
             ArrayList<String> list = new ArrayList<String>();
             try {
-                String requestURL = "https://db.hatchtrack.com:18888/api/v1/email2uuids?email=test@widgt.ninja";
+                String requestURL = "https://db.hatchtrack.com:18888/api/v1/email2uuids?email=" + email;
                 URL url = new URL(requestURL);
 
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -156,16 +164,17 @@ public class PeepDatabaseSyncFragment extends Fragment {
         }
 
         @Override
-        protected ArrayList<PeepUnit>  doInBackground(String... emails) {
+        protected ArrayList<PeepUnit>  doInBackground(Pair<String, String>... pairs) {
             ArrayList<PeepUnit> peepUnits = new ArrayList<PeepUnit>();
-            String email = emails[0];
+            String email = pairs[0].first;
+            String password = pairs[0].second;
 
-            String accessToken = getAccessToken(email);
-            ArrayList<String> uuids = getPeepUUIDs(accessToken);
+            String accessToken = getAccessToken(email, password);
+            ArrayList<String> uuids = getPeepUUIDs(accessToken, email);
             String name  = "";
             for (int j = 0; j < uuids.size(); j++) {
                 name = getPeepName(accessToken, uuids.get(j));
-                peepUnits.add(new PeepUnit(uuids.get(j), name));
+                peepUnits.add(new PeepUnit(email, password, uuids.get(j), name));
             }
 
             return peepUnits;

@@ -31,4 +31,5 @@
     <string name="edit_text_wifi_ssid">SSID</string>
     <string name="text_view_ble_config_wifi_title">WiFi Credentials</string>
     <string name="text_view_ble_wifi_config_status">Scan for Peep...</string>
+
 </resources>

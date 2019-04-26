@@ -2,6 +2,7 @@ package com.example.hatchtracksensor;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.FragmentTransaction;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -37,6 +38,8 @@ import static com.amazonaws.mobile.auth.core.internal.util.ThreadUtils.runOnUiTh
 
 public class BluetoothFragment extends Fragment {
 
+    private AccountManager mAccountManager = null;
+    private PeepUnitManager mPeepUnitManager = null;
     private Button mButtonScan = null;
 
     private static final String PEEP_DEVICE_NAME_STR = "ESP32";
@@ -181,6 +184,15 @@ public class BluetoothFragment extends Fragment {
                                               int status) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     Log.i(TAG, "SUCCESS!!");
+                    String email = mAccountManager.getEmail();
+                    String password = mAccountManager.getPassword();
+                    PeepUnit peepUnit = new PeepUnit(email, password, mPeepUUID, "N/A");
+                    mPeepUnitManager.addPeepUnit(peepUnit);
+
+                    Fragment fragment = new HatchConfigFragment();
+                    FragmentTransaction ft = getFragmentManager().beginTransaction();
+                    ft.replace(R.id.content_view, fragment);
+                    ft.commit();
                 }
             }
     };
@@ -241,6 +253,9 @@ public class BluetoothFragment extends Fragment {
 
         Activity activity = getActivity();
         Context context = getContext();
+
+        mAccountManager = new AccountManager(context);
+        mPeepUnitManager = new PeepUnitManager();
 
         mButtonScan = activity.findViewById(R.id.buttonScan);
         mEditTextWiFiSSID = activity.findViewById(R.id.editTextWiFiSsid);

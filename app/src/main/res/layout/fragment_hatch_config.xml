@@ -11,6 +11,44 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <Button
+            android:id="@+id/buttonHatchConfigure"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="24dp"
+            android:background="@drawable/button_rounded_corners"
+            android:text="@string/button_hatch_configure"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/editTextHatchConfigInterval" />
+
+        <TextView
+            android:id="@+id/textViewHatchConfigStatus2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/text_view_hatch_config_status"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imageView3" />
+
+        <ImageView
+            android:id="@+id/imageView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="88dp"
+            android:src="@drawable/ic_peep"
+            app:layout_constraintBottom_toTopOf="@+id/editTextHatchConfigName"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
         <android.support.constraint.Guideline
             android:id="@+id/guideline5"
             android:layout_width="wrap_content"
@@ -26,20 +64,60 @@
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.497"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/textView"></ProgressBar>
+            app:layout_constraintTop_toTopOf="@+id/textViewHatchConfigNameTitle"></ProgressBar>
+
+        <TextView
+            android:id="@+id/textViewHatchConfigNameTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="@string/text_view_hatch_config_name_title"
+            app:layout_constraintBottom_toTopOf="@+id/editTextHatchConfigName"
+            app:layout_constraintStart_toStartOf="@+id/editTextHatchConfigName" />
+
+        <EditText
+            android:id="@+id/editTextHatchConfigName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="32dp"
+            android:ems="10"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/guideline5" />
+
+        <EditText
+            android:id="@+id/editTextHatchConfigInterval"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="56dp"
+            android:layout_marginEnd="96dp"
+            android:ems="10"
+            android:inputType="numberDecimal"
+            app:layout_constraintEnd_toEndOf="@+id/editTextHatchConfigName"
+            app:layout_constraintStart_toStartOf="@+id/editTextHatchConfigName"
+            app:layout_constraintTop_toBottomOf="@+id/editTextHatchConfigName" />
+
+        <TextView
+            android:id="@+id/textViewHatchConfigDurationTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="@string/text_view_hatch_config_duration_title"
+            app:layout_constraintBottom_toTopOf="@+id/editTextHatchConfigInterval"
+            app:layout_constraintStart_toStartOf="@+id/editTextHatchConfigInterval" />
 
         <TextView
             android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="16dp"
-            app:layout_constraintBottom_toTopOf="@+id/guideline5"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            android:layout_marginStart="16dp"
+            android:text="@string/text_view_measure_duration_units"
+            app:layout_constraintBottom_toBottomOf="@+id/editTextHatchConfigInterval"
+            app:layout_constraintStart_toEndOf="@+id/editTextHatchConfigInterval"
+            app:layout_constraintTop_toTopOf="@+id/editTextHatchConfigInterval" />
 
     </android.support.constraint.ConstraintLayout>
 </FrameLayout>

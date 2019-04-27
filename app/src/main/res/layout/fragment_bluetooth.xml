@@ -38,7 +38,7 @@
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_marginStart="24dp"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="72dp"
             android:layout_marginEnd="24dp"
             android:background="@drawable/button_rounded_corners"
             android:text="@string/button_scan"
@@ -82,7 +82,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_begin="366dp" />
+            app:layout_constraintGuide_begin="360dp" />
 
         <TextView
             android:id="@+id/textViewBleConfigTitle"

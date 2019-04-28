@@ -33,6 +33,19 @@ public class PeepUnitManager {
         return names;
     }
 
+    public void addPeepUnit(PeepUnit peepUnit) {
+        mPeepList.add(0, peepUnit);
+    }
+
+    public PeepUnit getPeepUnit(int index) {
+        if (index < mPeepList.size()) {
+            return mPeepList.get(index);
+        }
+        else {
+            return null;
+        }
+    }
+
     public PeepUnit[] getPeepUnits() {
         PeepUnit units[] = new PeepUnit[mPeepList.size()];
         PeepUnit unit;

@@ -104,6 +104,7 @@ public class HatchConfigFragment extends Fragment {
                 conn.setReadTimeout(15000);
                 conn.setConnectTimeout(15000);
                 conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json");
                 conn.setDoInput(true);
                 conn.setDoOutput(true);
 

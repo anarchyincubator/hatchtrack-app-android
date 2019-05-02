@@ -84,7 +84,7 @@ public class HatchConfigFragment extends Fragment {
 
             String accessToken = RestApi.postUserAuth(email, password);
             for (int i = 0; i < peepUnits.length; i++) {
-                RestApi.postNewPeepHatch(accessToken, peepUnits[i]);
+                RestApi.postPeepHatchInfo(accessToken, peepUnits[i]);
             }
 
             return peepUnits;

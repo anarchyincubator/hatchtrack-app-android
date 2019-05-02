@@ -86,7 +86,7 @@ public class PeepDatabaseSyncFragment extends Fragment {
                 PeepUnit peepUnit = new PeepUnit(email, password, uuids.get(j), name);
 
 
-                json = RestApi.getPeepHatchInfo(accessToken, uuid);
+                json = RestApi.getPeepHatchInfo(accessToken, peepUnit);
                 try {
                     peepUnit.setHatchUUID(json.getString("hatchUUID"));
                     peepUnit.setEndUnixTimestamp(json.getLong("endUnixTimestamp"));

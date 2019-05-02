@@ -6,7 +6,6 @@ import android.app.Fragment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.FrameMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,14 +63,16 @@ public class PeepSelectFragment extends Fragment {
                 new MyRecyclerViewAdapter.ItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                        mPeepUnitManager.setPeepUnitActive(position);
+                        //mPeepUnitManager.setPeepUnitActive(position);
 
                         //Fragment fragment = new SensorFragment();
                         Fragment fragment = new PeepUnitFragment();
                         Bundle args = new Bundle();
-                        args.putInt("index", 0);
+                        args.putInt("index", position);
+                        fragment.setArguments(args);
                         FragmentTransaction ft = getFragmentManager().beginTransaction();
                         ft.replace(R.id.content_view, fragment);
+                        ft.addToBackStack(null);
                         ft.commit();
                     }
                 }

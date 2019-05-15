@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.RadioButton;
 
 import static com.amazonaws.mobile.auth.core.internal.util.ThreadUtils.runOnUiThread;
@@ -27,6 +28,7 @@ public class PeepUnitFragment extends Fragment {
     private RadioButton mRadioButtonCelsius;
     private Button mButtonConfigure;
     private Button mButtonMonitor;
+    private ProgressBar mProgress;
 
     private PeepUnitManager mPeepUnitManager;
     private PeepUnit mPeepUnit;
@@ -71,6 +73,9 @@ public class PeepUnitFragment extends Fragment {
         mRadioButtonMinutes = activity.findViewById(R.id.radioButtonMeasureMinutes);
         mRadioButtonFahrenheit = activity.findViewById(R.id.radioButtonTemperatureFahrenheit);
         mRadioButtonCelsius = activity.findViewById(R.id.radioButtonTemperatureCelsius);
+        mProgress = activity.findViewById(R.id.progressBarConfigure);
+
+        mProgress.setVisibility(View.GONE);
 
         mEditTextPeepName.setText(mPeepUnit.getName());
         int tmp = mPeepUnit.getMeasureIntervalMin();
@@ -81,12 +86,12 @@ public class PeepUnitFragment extends Fragment {
             mRadioButtonMinutes.setChecked(true);
         }
         mEditTextPeepMeasurementInterval.setText(String.valueOf(tmp));
-        mEditTextPeepTemperatureOffset.setText(String.valueOf(mPeepUnit.getTemperatureOffset()));
-        if (PeepUnit.PEEP_UNIT_TEMPERATURE_CELSIUS == mPeepUnit.getTemperatureUnits()) {
+        mEditTextPeepTemperatureOffset.setText(String.valueOf(mPeepUnit.getTemperatureOffsetCelsius()));
+/*        if (PeepUnit.PEEP_UNIT_TEMPERATURE_CELSIUS == mPeepUnit.getTemperatureUnits()) {
             mRadioButtonCelsius.setChecked(true);
         } else {
             mRadioButtonFahrenheit.setChecked(true);
-        }
+        }*/
 
         mButtonConfigure.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -122,9 +127,11 @@ public class PeepUnitFragment extends Fragment {
                         String password = mPeepUnit.getUserPassword();
 
                         UiUpdate(true);
+                        mProgress.setVisibility(View.VISIBLE);
                         String accessToken = RestApi.postUserAuth(email, password);
                         RestApi.postPeepName(accessToken, mPeepUnit);
                         RestApi.postPeepHatchInfo(accessToken, mPeepUnit);
+                        mProgress.setVisibility(View.GONE);
                         UiUpdate(false);
                     }
                 });

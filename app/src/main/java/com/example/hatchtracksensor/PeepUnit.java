@@ -8,16 +8,20 @@ public class PeepUnit {
     private String mUserPassword;
     private long mEndUnixTimestamp;
     private int mMeasureIntervalMin;
-    private int mTemperatureOffset;
-    private int mTemperatureUnits;
-
-    public static final int PEEP_UNIT_TEMPERATURE_FAHRENHEIT = 1;
-    public static final int PEEP_UNIT_TEMPERATURE_CELSIUS = 2;
+    private int mTemperatureOffsetCelsius;
 
     public PeepUnit() {
         mEndUnixTimestamp = 0;
         mMeasureIntervalMin = 15;
-        mTemperatureUnits = PEEP_UNIT_TEMPERATURE_FAHRENHEIT;
+    }
+
+    public PeepUnit(String userEmail, String userPassword, String uuid) {
+        mUserEmail = userEmail;
+        mUserPassword = userPassword;
+        mUUID = uuid;
+        mEndUnixTimestamp = 0;
+        mMeasureIntervalMin = 15;
+        mTemperatureOffsetCelsius = 0;
     }
 
     public PeepUnit(String userEmail, String userPassword, String uuid, String name) {
@@ -27,8 +31,7 @@ public class PeepUnit {
         mName = name;
         mEndUnixTimestamp = 0;
         mMeasureIntervalMin = 15;
-        mTemperatureOffset = 0;
-        mTemperatureUnits = PEEP_UNIT_TEMPERATURE_FAHRENHEIT;
+        mTemperatureOffsetCelsius = 0;
     }
 
     public String getName() { return mName; }
@@ -45,9 +48,7 @@ public class PeepUnit {
 
     public int getMeasureIntervalMin() { return mMeasureIntervalMin; }
 
-    public int getTemperatureOffset() { return mTemperatureOffset; }
-
-    public int getTemperatureUnits() { return mTemperatureUnits; }
+    public int getTemperatureOffsetCelsius() { return mTemperatureOffsetCelsius; }
 
     public void setName(String name) { mName = name; }
 
@@ -63,13 +64,5 @@ public class PeepUnit {
 
     public void setMeasureIntervalMin(int intervalMin) { mMeasureIntervalMin = intervalMin; }
 
-    public void setTemperatureOffset(int offset) { mTemperatureOffset = offset; }
-
-    public void setTemperatureUnits(int temperatureUnits) {
-        if (temperatureUnits == PEEP_UNIT_TEMPERATURE_CELSIUS) {
-            mTemperatureUnits = PEEP_UNIT_TEMPERATURE_CELSIUS;
-        } else {
-            mTemperatureUnits = PEEP_UNIT_TEMPERATURE_FAHRENHEIT;
-        }
-    }
+    public void setTemperatureOffsetCelsius(int offset) { mTemperatureOffsetCelsius = offset; }
 }

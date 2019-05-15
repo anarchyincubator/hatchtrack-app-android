@@ -71,30 +71,17 @@ public class PeepDatabaseSyncFragment extends Fragment {
             String password = pairs[0].second;
 
             String accessToken = RestApi.postUserAuth(email, password);
-            ArrayList<String> uuids = RestApi.getPeepUUIDs(accessToken, email);
+            ArrayList<String> uuids = RestApi.getPeepUUIDs(accessToken);
             JSONObject json;
             String uuid;
             for (int j = 0; j < uuids.size(); j++) {
                 uuid = uuids.get(j);
-                json = RestApi.getPeepName(accessToken, uuid);
-                String name = "";
-                try {
-                    name = json.getString("name");
-                } catch (Exception e) {
-                    name = uuid;
-                }
-                PeepUnit peepUnit = new PeepUnit(email, password, uuids.get(j), name);
+                PeepUnit peepUnit = new PeepUnit(email, password, uuid);
 
+                String name = RestApi.getPeepName(accessToken, peepUnit);
+                peepUnit.setName(name);
 
-                json = RestApi.getPeepHatchInfo(accessToken, peepUnit);
-                try {
-                    peepUnit.setHatchUUID(json.getString("hatchUUID"));
-                    peepUnit.setEndUnixTimestamp(json.getLong("endUnixTimestamp"));
-                    peepUnit.setMeasureIntervalMin(json.getInt("measureIntervalMin"));
-                    peepUnit.setTemperatureOffset(json.getInt("temperatureOffset"));
-                } catch (Exception e) {
-                    Log.e("MREUTMAN", e.toString());
-                }
+                // TODO: Get Hatches associated with a given Peep.
 
                 peepUnits.add(peepUnit);
             }

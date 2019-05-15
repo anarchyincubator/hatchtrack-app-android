@@ -1,5 +1,7 @@
 package com.example.hatchtracksensor;
 
+import android.util.JsonReader;
+
 import com.amazonaws.util.IOUtils;
 
 import org.json.JSONArray;
@@ -15,7 +17,7 @@ import java.net.URL;
 import java.util.ArrayList;
 
 public class RestApi {
-    private static final String HEADER_ACCESS_TOKEN = "access-token";
+    private static final String HEADER_ACCESS_TOKEN = "Access-Token";
 
     public static String postUserAuth(String email, String password) {
         String accessToken = "";
@@ -55,11 +57,12 @@ public class RestApi {
         return accessToken;
     }
 
-    public static JSONObject getPeepName(String accessToken, String peepUUID) {
-        JSONObject json = null;
+    public static String getPeepName(String accessToken, PeepUnit peepUnit) {
+        String peepUUID = peepUnit.getUUID();
+        String peepName = "";
 
         try {
-            String requestURL = "https://db.hatchtrack.com:18888/api/v1/uuid2info?uuid=" + peepUUID;
+            String requestURL = "https://db.hatchtrack.com:18888/api/v1/peep/name?uuid=" + peepUUID;
             URL url = new URL(requestURL);
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -70,13 +73,19 @@ public class RestApi {
             conn.setDoInput(true);
 
             InputStream in = new BufferedInputStream(conn.getInputStream());
-            String  data= IOUtils.toString(in);
-            json = new JSONObject(data);
+            String data = IOUtils.toString(in);
+            JSONObject json = new JSONObject(data);
+            try {
+                peepName = json.getString("peepName");
+            } catch (Exception e) {
+                peepName = "N/A";
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return json;
+        return peepName;
     }
 
     public static boolean postPeepName(String accessToken, PeepUnit peepUnit) {
@@ -87,7 +96,7 @@ public class RestApi {
             json.put("peepUUID", peepUnit.getUUID());
             json.put("peepName", peepUnit.getName());
             String body = json.toString();
-            String requestURL = "https://db.hatchtrack.com:18888/api/v1/uuid2info";
+            String requestURL = "https://db.hatchtrack.com:18888/api/v1/peep/name";
             URL url = new URL(requestURL);
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -119,11 +128,10 @@ public class RestApi {
         return status;
     }
 
-    public static ArrayList<String> getPeepUUIDs(String accessToken, String userEmail) {
+    public static ArrayList<String> getPeepUUIDs(String accessToken) {
         ArrayList<String> list = new ArrayList<String>();
         try {
-            String reqURL = "https://db.hatchtrack.com:18888/api/v1/email2uuids?email=" +
-                    userEmail;
+            String reqURL = "https://db.hatchtrack.com:18888/api/v1/user/peeps";
             URL url = new URL(reqURL);
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -136,7 +144,7 @@ public class RestApi {
             InputStream in = new BufferedInputStream(conn.getInputStream());
             String  data= IOUtils.toString(in);
             JSONObject json = new JSONObject(data);
-            JSONArray array = json.getJSONArray("peep_uuids");
+            JSONArray array = json.getJSONArray("peepUUIDs");
             for (int i = 0; i < array.length(); i++) {
                 list.add(array.getString(i));
             }
@@ -147,12 +155,12 @@ public class RestApi {
         return  list;
     }
 
-    public static JSONObject getPeepHatchInfo(String accessToken, PeepUnit peepUnit) {
-        JSONObject json = null;
+    public static ArrayList<String> getHatchUUIDs(String accessToken, PeepUnit peepUnit) {
+        ArrayList<String> list = new ArrayList<String>();
         String peepUUID = peepUnit.getUUID();
 
         try {
-            String reqURL = "https://db.hatchtrack.com:18888/api/v1/uuid2hatch?uuid=" + peepUUID;
+            String reqURL = "https://db.hatchtrack.com:18888/api/v1/peep/hatches?uuid=" + peepUUID;
             URL url = new URL(reqURL);
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -164,12 +172,16 @@ public class RestApi {
 
             InputStream in = new BufferedInputStream(conn.getInputStream());
             String  data= IOUtils.toString(in);
-            json = new JSONObject(data);
+            JSONObject json = new JSONObject(data);
+            JSONArray array = json.getJSONArray("hatchUUIDs");
+            for (int i = 0; i < array.length(); i++) {
+                list.add(array.getString(i));
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return json;
+        return list;
     }
 
     public static boolean postPeepHatchInfo(String accessToken, PeepUnit peepUnit) {
@@ -177,20 +189,18 @@ public class RestApi {
 
         try {
             String peepUUID = peepUnit.getUUID();
-            String email = peepUnit.getUserEmail();
             long endUnixTimestamp = peepUnit.getEndUnixTimestamp();
             int measureIntervalMin = peepUnit.getMeasureIntervalMin();
-            int temperatureOffset = peepUnit.getTemperatureOffset();
+            int temperatureOffsetCelsius = peepUnit.getTemperatureOffsetCelsius();
 
             JSONObject json = new JSONObject();
-            json.put("email", email);
             json.put("peepUUID", peepUUID);
             json.put("endUnixTimestamp", endUnixTimestamp);
             json.put("measureIntervalMin", measureIntervalMin);
-            json.put("temperatureOffset", temperatureOffset);
+            json.put("temperatureOffsetCelsius", temperatureOffsetCelsius);
             String body = json.toString();
 
-            String requestURL = "https://db.hatchtrack.com:18888/api/v1/uuid2hatch";
+            String requestURL = "https://db.hatchtrack.com:18888/api/v1/peep/hatch";
             URL url = new URL(requestURL);
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();

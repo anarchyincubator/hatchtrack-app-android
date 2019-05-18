@@ -1,27 +1,25 @@
 package com.example.hatchtracksensor;
 
+import java.util.ArrayList;
+
 public class PeepUnit {
     private String mName;
     private String mUUID;
-    private String mHatchUUID;
     private String mUserEmail;
     private String mUserPassword;
-    private long mEndUnixTimestamp;
-    private int mMeasureIntervalMin;
-    private int mTemperatureOffsetCelsius;
+    private PeepHatch mHatch;
 
     public PeepUnit() {
-        mEndUnixTimestamp = 0;
-        mMeasureIntervalMin = 15;
+        mName = "none";
+        mHatch = null;
     }
 
     public PeepUnit(String userEmail, String userPassword, String uuid) {
         mUserEmail = userEmail;
         mUserPassword = userPassword;
         mUUID = uuid;
-        mEndUnixTimestamp = 0;
-        mMeasureIntervalMin = 15;
-        mTemperatureOffsetCelsius = 0;
+        mName = "none";
+        mHatch = null;
     }
 
     public PeepUnit(String userEmail, String userPassword, String uuid, String name) {
@@ -29,40 +27,26 @@ public class PeepUnit {
         mUserPassword = userPassword;
         mUUID = uuid;
         mName = name;
-        mEndUnixTimestamp = 0;
-        mMeasureIntervalMin = 15;
-        mTemperatureOffsetCelsius = 0;
+        mHatch = null;
     }
 
     public String getName() { return mName; }
 
     public String getUUID() { return mUUID; }
 
-    public String getHatchUUID() { return mHatchUUID; }
+    public PeepHatch getLastHatch() { return mHatch; }
 
     public String getUserEmail() { return mUserEmail; }
 
     public String getUserPassword() { return  mUserPassword; }
 
-    public long getEndUnixTimestamp() { return mEndUnixTimestamp; }
-
-    public int getMeasureIntervalMin() { return mMeasureIntervalMin; }
-
-    public int getTemperatureOffsetCelsius() { return mTemperatureOffsetCelsius; }
-
     public void setName(String name) { mName = name; }
 
     public void setUUID(String uuid) { mUUID = uuid; }
 
-    public void setHatchUUID(String uuid) { mHatchUUID = uuid; }
+    public void setHatch(PeepHatch hatch) { mHatch = hatch; }
 
     public void setUserEmail(String email) { mUserEmail = email; }
 
     public void setUserPassword(String password) { mUserPassword = password; }
-
-    public void setEndUnixTimestamp(long unixTimestamp) { mEndUnixTimestamp = unixTimestamp; }
-
-    public void setMeasureIntervalMin(int intervalMin) { mMeasureIntervalMin = intervalMin; }
-
-    public void setTemperatureOffsetCelsius(int offset) { mTemperatureOffsetCelsius = offset; }
 }

@@ -1,6 +1,7 @@
 package com.example.hatchtracksensor;
 
 import android.app.Activity;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -67,6 +68,7 @@ public class HatchConfigFragment extends Fragment {
                 mSpinner.setVisibility(View.VISIBLE);
 
                 PeepUnit peepUnit = mPeepUnitManager.getPeepUnit(0);
+                peepUnit.setName(mPeepName);
                 mJob = new DbSyncJob();
                 mJob.execute(peepUnit);
             }
@@ -81,11 +83,17 @@ public class HatchConfigFragment extends Fragment {
         protected PeepUnit[] doInBackground(PeepUnit... peepUnits) {
             String email = peepUnits[0].getUserEmail();
             String password = peepUnits[0].getUserPassword();
+            PeepUnit peepUnit = peepUnits[0];
+
+            PeepHatch peepHatch = new PeepHatch();
+            peepHatch.setTemperatureOffsetCelsius(0);
+            peepHatch.setMeasureIntervalMin(mMeasureIntervalMin);
+            peepHatch.setEndUnixTimestamp(2147483647);
 
             String accessToken = RestApi.postUserAuth(email, password);
-            for (int i = 0; i < peepUnits.length; i++) {
-                RestApi.postPeepHatchInfo(accessToken, peepUnits[i]);
-            }
+            RestApi.postUserNewPeep(accessToken, peepUnit);
+            RestApi.postPeepName(accessToken, peepUnit);
+            RestApi.postNewPeepHatch(accessToken, peepUnit, peepHatch);
 
             return peepUnits;
         }
@@ -93,7 +101,12 @@ public class HatchConfigFragment extends Fragment {
         @Override
         protected void onPostExecute(PeepUnit[] peepUnits) {
             Log.i("MREUTMAN", "HatchConfigFragment DONE!");
-
+            //mPeepUnitManager.setPeepUnitActive(mPeepUnitIndex);
+            Fragment fragment = new PeepDatabaseSyncFragment();
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            ft.replace(R.id.content_view, fragment);
+            ft.addToBackStack(null);
+            ft.commit();
         }
     }
 

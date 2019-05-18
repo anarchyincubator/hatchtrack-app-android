@@ -32,6 +32,7 @@ public class PeepUnitFragment extends Fragment {
 
     private PeepUnitManager mPeepUnitManager;
     private PeepUnit mPeepUnit;
+    private PeepHatch mPeepHatch;
     private int mPeepUnitIndex;
 
     public PeepUnitFragment() {
@@ -63,6 +64,7 @@ public class PeepUnitFragment extends Fragment {
 
         mPeepUnitManager = new PeepUnitManager();
         mPeepUnit = mPeepUnitManager.getPeepUnit(mPeepUnitIndex);
+        mPeepHatch = new PeepHatch();
 
         mButtonConfigure = activity.findViewById(R.id.buttonPeepConfigure);
         mButtonMonitor = activity.findViewById(R.id.buttonPeepMonitor);
@@ -78,7 +80,7 @@ public class PeepUnitFragment extends Fragment {
         mProgress.setVisibility(View.GONE);
 
         mEditTextPeepName.setText(mPeepUnit.getName());
-        int tmp = mPeepUnit.getMeasureIntervalMin();
+        int tmp = mPeepHatch.getMeasureIntervalMin();
         if (0 == (tmp % 60)) {
             tmp = tmp / 60;
             mRadioButtonHours.setChecked(true);
@@ -86,7 +88,7 @@ public class PeepUnitFragment extends Fragment {
             mRadioButtonMinutes.setChecked(true);
         }
         mEditTextPeepMeasurementInterval.setText(String.valueOf(tmp));
-        mEditTextPeepTemperatureOffset.setText(String.valueOf(mPeepUnit.getTemperatureOffsetCelsius()));
+        mEditTextPeepTemperatureOffset.setText(String.valueOf(mPeepHatch.getTemperatureOffsetCelsius()));
 /*        if (PeepUnit.PEEP_UNIT_TEMPERATURE_CELSIUS == mPeepUnit.getTemperatureUnits()) {
             mRadioButtonCelsius.setChecked(true);
         } else {
@@ -113,12 +115,13 @@ public class PeepUnitFragment extends Fragment {
                         measureInterval *= 60;
                     }
                 } catch (Exception e) {
-                    measureInterval = mPeepUnit.getMeasureIntervalMin();
+                    measureInterval = mPeepHatch.getMeasureIntervalMin();
                 }
 
                 // TODO: Throw error/warning if invalid?
                 mPeepUnit.setName(name);
-                mPeepUnit.setMeasureIntervalMin(measureInterval);
+                mPeepHatch.setMeasureIntervalMin(measureInterval);
+                //mPeepUnit.setHatch();
 
                 AsyncTask.execute(new Runnable() {
                     @Override
@@ -130,7 +133,7 @@ public class PeepUnitFragment extends Fragment {
                         mProgress.setVisibility(View.VISIBLE);
                         String accessToken = RestApi.postUserAuth(email, password);
                         RestApi.postPeepName(accessToken, mPeepUnit);
-                        RestApi.postPeepHatchInfo(accessToken, mPeepUnit);
+                        RestApi.postNewPeepHatch(accessToken, mPeepUnit, mPeepHatch);
                         mProgress.setVisibility(View.GONE);
                         UiUpdate(false);
                     }
@@ -145,7 +148,6 @@ public class PeepUnitFragment extends Fragment {
                 Fragment fragment = new SensorFragment();
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
                 ft.replace(R.id.content_view, fragment);
-                ft.addToBackStack(null);
                 ft.commit();
             }
         });

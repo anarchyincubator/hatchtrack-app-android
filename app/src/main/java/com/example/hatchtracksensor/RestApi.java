@@ -239,7 +239,7 @@ public class RestApi {
             conn.setDoInput(true);
 
             InputStream in = new BufferedInputStream(conn.getInputStream());
-            String data= IOUtils.toString(in);
+            String data = IOUtils.toString(in);
             JSONObject json = new JSONObject(data);
             peepHatch.setUUID(hatchUUID);
             peepHatch.setStartUnixTimestamp(json.getLong("startUnixTimestamp"));
@@ -301,5 +301,41 @@ public class RestApi {
         }
 
         return status;
+    }
+
+    public static PeepMeasurement getPeepLastMeasure(String accessToken, PeepUnit peepUnit) {
+        PeepMeasurement peepMeasurement;
+        String peepUUID = peepUnit.getUUID();
+
+        try {
+            String reqURL = "https://db.hatchtrack.com:18888/api/v1/peep/measure/last?peepUUID=" + peepUUID;
+            URL url = new URL(reqURL);
+
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty(HEADER_ACCESS_TOKEN, accessToken);
+            conn.setDoInput(true);
+
+            InputStream in = new BufferedInputStream(conn.getInputStream());
+            String  data= IOUtils.toString(in);
+            JSONObject json = new JSONObject(data);
+            peepMeasurement = new PeepMeasurement(
+                    json.getString("hatchUUID"),
+                    json.getLong("unixTimestamp"),
+                    json.getInt("humidity"),
+                    json.getInt("temperature")
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            peepMeasurement = new PeepMeasurement(
+                    "n/a",
+                    0,
+                    0,
+                    0);
+        }
+
+        return peepMeasurement;
     }
 }

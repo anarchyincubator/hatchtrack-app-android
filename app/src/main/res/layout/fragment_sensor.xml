@@ -13,70 +13,62 @@
 
         <TextView
             android:id="@+id/textViewTimeUpdate"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="88dp"
+            android:layout_marginTop="24dp"
             android:layout_marginEnd="8dp"
-            android:layout_marginBottom="48dp"
             android:text="@string/text_view_time_update"
-            android:textSize="12sp"
-            app:layout_constraintBottom_toTopOf="@+id/imageViewTemperature"
+            android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.498"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textViewHumidity" />
 
         <ImageView
             android:id="@+id/imageViewTemperature"
             android:layout_width="122dp"
             android:layout_height="122dp"
             android:layout_marginStart="8dp"
+            android:layout_marginTop="88dp"
             android:layout_marginEnd="8dp"
-            android:layout_marginBottom="96dp"
             android:contentDescription="@string/image_view_temperature_content_description"
             android:src="@drawable/ic_temperature"
-            app:layout_constraintBottom_toTopOf="@+id/guideline"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <android.support.constraint.Guideline
-            android:id="@+id/guideline"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_begin="368dp" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/imageViewHumidity"
             android:layout_width="122dp"
             android:layout_height="122dp"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="80dp"
+            android:layout_marginTop="16dp"
             android:layout_marginEnd="8dp"
             android:contentDescription="@string/image_view_humidity_content_description"
             android:src="@drawable/ic_humidity"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.501"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageViewTemperature" />
+            app:layout_constraintTop_toBottomOf="@+id/textViewTemperature" />
 
         <Button
             android:id="@+id/buttonPeepSelect"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
+            android:layout_marginTop="16dp"
             android:layout_marginEnd="24dp"
-            android:layout_marginBottom="64dp"
             android:background="@drawable/button_rounded_corners"
             android:text="@string/button_peep_select"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textViewMeasurementInterval" />
 
         <TextView
             android:id="@+id/textViewTemperature"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="16dp"
             android:text="@string/text_view_temperature"
             android:textSize="24sp"
             android:textStyle="bold"
@@ -88,12 +80,34 @@
             android:id="@+id/textViewHumidity"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             android:text="@string/text_view_humidity"
             android:textSize="24sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="@+id/imageViewHumidity"
             app:layout_constraintStart_toStartOf="@+id/imageViewHumidity"
             app:layout_constraintTop_toBottomOf="@+id/imageViewHumidity" />
+
+        <TextView
+            android:id="@+id/textViewTemperatureOffset"
+            android:layout_width="0dp"
+            android:layout_height="17dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="N/A"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/textViewTimeUpdate"
+            app:layout_constraintTop_toBottomOf="@+id/textViewTimeUpdate" />
+
+        <TextView
+            android:id="@+id/textViewMeasurementInterval"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="N/A"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/textViewTemperatureOffset"
+            app:layout_constraintTop_toBottomOf="@+id/textViewTemperatureOffset" />
     </android.support.constraint.ConstraintLayout>
 </FrameLayout>

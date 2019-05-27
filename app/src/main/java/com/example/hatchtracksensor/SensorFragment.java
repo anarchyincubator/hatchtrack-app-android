@@ -12,6 +12,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -20,9 +22,16 @@ import java.util.TimeZone;
 
 public class SensorFragment extends Fragment {
 
+    private final SettingsManager.TemperatureUnits CELSIUS =
+            SettingsManager.TemperatureUnits.CELSIUS;
+    private final SettingsManager.TemperatureUnits FAHRENHEIT =
+            SettingsManager.TemperatureUnits.FAHRENHEIT;
+
     private TextView mTextViewTimeUpdate;
     private TextView mTextViewTemperature;
     private TextView mTextViewHumidity;
+    private TextView mTextViewTemperatureOffset;
+    private TextView mTextViewMeasurementInterval;
     private Button mButtonPeepSelect;
 
     private PeepUnitManager mPeepUnitManager;
@@ -30,6 +39,7 @@ public class SensorFragment extends Fragment {
 
     // Poll the database for new data at the provided time interval.
     private final static int mDbPollInterval = 1000 * 60 * 1; // 1 minute
+    float mTemperatureOffsetCelcius = 0.0f;
 
     private Handler mHandler = new Handler();
     private Runnable mHandlerTask = new Runnable() {
@@ -67,10 +77,39 @@ public class SensorFragment extends Fragment {
         mTextViewTimeUpdate = getView().findViewById(R.id.textViewTimeUpdate);
         mTextViewTemperature = getView().findViewById(R.id.textViewTemperature);
         mTextViewHumidity = getView().findViewById(R.id.textViewHumidity);
+        mTextViewMeasurementInterval = getView().findViewById(R.id.textViewMeasurementInterval);
+        mTextViewTemperatureOffset = getView().findViewById(R.id.textViewTemperatureOffset);
         mButtonPeepSelect = getView().findViewById(R.id.buttonPeepSelect);
+
+        SettingsManager.TemperatureUnits units = mSettingsManager.getTemperatureUnits();
+        float offset = peep.getLastHatch().getTemperatureOffsetCelsius();
+        mTemperatureOffsetCelcius = offset;
+        if (CELSIUS == units) {
+            String s = "Temperature Offset: " + offset + " ℃";
+            mTextViewTemperatureOffset.setText(s);
+        }
+        else if (FAHRENHEIT == units) {
+            offset *= 1.8;
+            String s = "Temperature Offset: " + offset + " ℉";
+            mTextViewTemperatureOffset.setText(s);
+        }
+
+        int interval = peep.getLastHatch().getMeasureIntervalMin();
+        if (0 == (interval % 60)) {
+            interval /= 60;
+            String s = "Measurement Interval: " + interval + " hours";
+            mTextViewMeasurementInterval.setText(s);
+        }
+        else {
+            String s = "Measurement Interval: " + interval + " minutes";
+            mTextViewMeasurementInterval.setText(s);
+        }
+
         mButtonPeepSelect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                stopRepeatingTask();
+
                 Fragment fragment = new PeepSelectFragment();
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
                 ft.replace(R.id.content_view, fragment);
@@ -116,25 +155,15 @@ public class SensorFragment extends Fragment {
         protected void onPostExecute(PeepMeasurement peepMeasurement) {
             try {
                 String fmt = "";
-
-                final SettingsManager.TemperatureUnits CELSIUS =
-                        SettingsManager.TemperatureUnits.CELSIUS;
-                final SettingsManager.TemperatureUnits FAHRENHEIT =
-                        SettingsManager.TemperatureUnits.FAHRENHEIT;
                 SettingsManager.TemperatureUnits units = mSettingsManager.getTemperatureUnits();
 
                 // Display Temperature value in the user specified units.
+                float t = peepMeasurement.getTemperature() + mTemperatureOffsetCelcius;
                 if (CELSIUS == units) {
-                    fmt = String.format(
-                            Locale.US,
-                            "%.1f",
-                            peepMeasurement.getTemperature() * 1.0) + " ℃";
+                    fmt = String.format(Locale.US, "%.1f", t) + " ℃";
                 }
                 else if (FAHRENHEIT == units) {
-                    fmt = String.format(
-                            Locale.US,
-                            "%.1f",
-                            (peepMeasurement.getTemperature() * 1.8) + 32.0) + " ℉";
+                    fmt = String.format(Locale.US, "%.1f", (t * 1.8) + 32.0) + " ℉";
                 }
                 mTextViewTemperature.setText(fmt);
 

@@ -57,12 +57,92 @@ public class RestApi {
         return accessToken;
     }
 
+    public static boolean postUserNewPeep(String accessToken, PeepUnit peepUnit) {
+        String peepUUID = peepUnit.getUUID();
+        boolean status = true;
+
+        try {
+            JSONObject json = new JSONObject();
+            json.put("peepUUID", peepUUID);
+            String body = json.toString();
+            String requestURL = "https://db.hatchtrack.com:18888/api/v1/user/peep";
+            URL url = new URL(requestURL);
+
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty(HEADER_ACCESS_TOKEN, accessToken);
+            conn.setDoOutput(true);
+
+            OutputStream out = conn.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+            writer.write(body);
+
+            writer.flush();
+            writer.close();
+            out.close();
+
+            int code = conn.getResponseCode();
+            if (200 == code) {
+                status = true;
+            } else {
+                status = false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return status;
+    }
+
+    public static boolean deleteUserPeep(String accessToken, PeepUnit peepUnit) {
+        String peepUUID = peepUnit.getUUID();
+        boolean status = true;
+
+        try {
+            JSONObject json = new JSONObject();
+            json.put("peepUUID", peepUUID);
+            String body = json.toString();
+            String requestURL = "https://db.hatchtrack.com:18888/api/v1/user/peep";
+            URL url = new URL(requestURL);
+
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("DELETE");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty(HEADER_ACCESS_TOKEN, accessToken);
+            conn.setDoOutput(true);
+
+            OutputStream out = conn.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+            writer.write(body);
+
+            writer.flush();
+            writer.close();
+            out.close();
+
+            int code = conn.getResponseCode();
+            if (200 == code) {
+                status = true;
+            } else {
+                status = false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return status;
+    }
+
     public static String getPeepName(String accessToken, PeepUnit peepUnit) {
         String peepUUID = peepUnit.getUUID();
         String peepName = "";
 
         try {
-            String requestURL = "https://db.hatchtrack.com:18888/api/v1/peep/name?uuid=" + peepUUID;
+            String requestURL = "https://db.hatchtrack.com:18888/api/v1/peep/name?peepUUID=" + peepUUID;
             URL url = new URL(requestURL);
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -160,7 +240,7 @@ public class RestApi {
         String peepUUID = peepUnit.getUUID();
 
         try {
-            String reqURL = "https://db.hatchtrack.com:18888/api/v1/peep/hatches?uuid=" + peepUUID;
+            String reqURL = "https://db.hatchtrack.com:18888/api/v1/peep/hatches?peepUUID=" + peepUUID;
             URL url = new URL(reqURL);
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -184,14 +264,85 @@ public class RestApi {
         return list;
     }
 
-    public static boolean postPeepHatchInfo(String accessToken, PeepUnit peepUnit) {
+    public static PeepHatch getHatch(String accessToken, String hatchUUID) {
+        PeepHatch peepHatch = new PeepHatch();
+
+        try {
+            String reqURL = "https://db.hatchtrack.com:18888/api/v1/hatch?hatchUUID=" + hatchUUID;
+            URL url = new URL(reqURL);
+
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty(HEADER_ACCESS_TOKEN, accessToken);
+            conn.setDoInput(true);
+
+            InputStream in = new BufferedInputStream(conn.getInputStream());
+            String data = IOUtils.toString(in);
+            JSONObject json = new JSONObject(data);
+            peepHatch.setUUID(hatchUUID);
+            peepHatch.setStartUnixTimestamp(json.getLong("startUnixTimestamp"));
+            peepHatch.setEndUnixTimestamp(json.getLong("endUnixTimestamp"));
+            peepHatch.setMeasureIntervalMin(json.getInt("measureIntervalMin"));
+            peepHatch.setTemperatureOffsetCelsius(json.getInt("temperatureOffsetCelsius"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return peepHatch;
+    }
+
+    public static boolean postHatchEnd(String accessToken, PeepHatch peepHatch) {
+        boolean status = false;
+
+        try {
+            JSONObject json = new JSONObject();
+            json.put("hatchUUID", peepHatch.getUUID());
+            String body = json.toString();
+
+            String requestURL = "https://db.hatchtrack.com:18888/api/v1/hatch/end";
+            URL url = new URL(requestURL);
+
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty(HEADER_ACCESS_TOKEN, accessToken);
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+
+            OutputStream out = conn.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+            writer.write(body);
+
+            writer.flush();
+            writer.close();
+            out.close();
+
+            int code = conn.getResponseCode();
+            if (200 == code) {
+                status = true;
+            } else {
+                status = false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            status = false;
+        }
+
+        return status;
+    }
+
+    public static boolean postNewPeepHatch(String accessToken, PeepUnit peepUnit, PeepHatch peepHatch) {
         boolean status = true;
 
         try {
             String peepUUID = peepUnit.getUUID();
-            long endUnixTimestamp = peepUnit.getEndUnixTimestamp();
-            int measureIntervalMin = peepUnit.getMeasureIntervalMin();
-            int temperatureOffsetCelsius = peepUnit.getTemperatureOffsetCelsius();
+            long endUnixTimestamp = peepHatch.getEndUnixTimestamp();
+            int measureIntervalMin = peepHatch.getMeasureIntervalMin();
+            float temperatureOffsetCelsius = peepHatch.getTemperatureOffsetCelsius();
 
             JSONObject json = new JSONObject();
             json.put("peepUUID", peepUUID);
@@ -232,5 +383,41 @@ public class RestApi {
         }
 
         return status;
+    }
+
+    public static PeepMeasurement getPeepLastMeasure(String accessToken, PeepUnit peepUnit) {
+        PeepMeasurement peepMeasurement;
+        String peepUUID = peepUnit.getUUID();
+
+        try {
+            String reqURL = "https://db.hatchtrack.com:18888/api/v1/peep/measure/last?peepUUID=" + peepUUID;
+            URL url = new URL(reqURL);
+
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty(HEADER_ACCESS_TOKEN, accessToken);
+            conn.setDoInput(true);
+
+            InputStream in = new BufferedInputStream(conn.getInputStream());
+            String  data= IOUtils.toString(in);
+            JSONObject json = new JSONObject(data);
+            peepMeasurement = new PeepMeasurement(
+                    json.getString("hatchUUID"),
+                    json.getLong("unixTimestamp"),
+                    json.getInt("humidity"),
+                    json.getInt("temperature")
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            peepMeasurement = new PeepMeasurement(
+                    "n/a",
+                    0,
+                    0,
+                    0);
+        }
+
+        return peepMeasurement;
     }
 }

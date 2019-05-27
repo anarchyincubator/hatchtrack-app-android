@@ -5,7 +5,7 @@ public class PeepHatch {
     private long mStartUnixTimestamp;
     private long mEndUnixTimestamp;
     private int mMeasureIntervalMin;
-    private int mTemperatureOffsetCelsius;
+    private float mTemperatureOffsetCelsius;
 
     public String getUUID() { return mUUID; }
 
@@ -15,7 +15,7 @@ public class PeepHatch {
 
     public int getMeasureIntervalMin() { return mMeasureIntervalMin; }
 
-    public int getTemperatureOffsetCelsius() { return mTemperatureOffsetCelsius; }
+    public float getTemperatureOffsetCelsius() { return mTemperatureOffsetCelsius; }
 
     public void setUUID(String uuid) { mUUID = uuid; }
 
@@ -25,5 +25,5 @@ public class PeepHatch {
 
     public void setMeasureIntervalMin(int intervalMin) { mMeasureIntervalMin = intervalMin; }
 
-    public void setTemperatureOffsetCelsius(int offset) { mTemperatureOffsetCelsius = offset; }
+    public void setTemperatureOffsetCelsius(float offset) { mTemperatureOffsetCelsius = offset; }
 }

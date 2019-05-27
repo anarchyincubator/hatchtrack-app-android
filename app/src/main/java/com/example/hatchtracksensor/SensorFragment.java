@@ -12,6 +12,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -20,25 +22,24 @@ import java.util.TimeZone;
 
 public class SensorFragment extends Fragment {
 
+    private final SettingsManager.TemperatureUnits CELSIUS =
+            SettingsManager.TemperatureUnits.CELSIUS;
+    private final SettingsManager.TemperatureUnits FAHRENHEIT =
+            SettingsManager.TemperatureUnits.FAHRENHEIT;
+
     private TextView mTextViewTimeUpdate;
     private TextView mTextViewTemperature;
     private TextView mTextViewHumidity;
+    private TextView mTextViewTemperatureOffset;
+    private TextView mTextViewMeasurementInterval;
     private Button mButtonPeepSelect;
 
     private PeepUnitManager mPeepUnitManager;
     private SettingsManager mSettingsManager;
 
-    // URL to our InfluxDB instance. Port 8086 is used for SSL communication to the database.
-    private static final String mDbURL = "https://db.hatchtrack.com:8086";
-    // User we will use to make queries to the database. Note: This user only has READ access.
-    private static final String mDbUser = "reader";
-    // Password for "reader" user. Keep this secret.
-    private static final String mDbPassword = "B5FX6jIhXz0kbBxE";
-    // This is the database holding our time series Peep data.
-    private static final String mDbName = "peep0";
     // Poll the database for new data at the provided time interval.
     private final static int mDbPollInterval = 1000 * 60 * 1; // 1 minute
-    private InfluxClient mInfluxClient;
+    float mTemperatureOffsetCelcius = 0.0f;
 
     private Handler mHandler = new Handler();
     private Runnable mHandlerTask = new Runnable() {
@@ -48,7 +49,7 @@ public class SensorFragment extends Fragment {
 
             mButtonPeepSelect.setText(peep.getName());
             SensorUpdateJob sensorUpdateJob = new SensorUpdateJob();
-            sensorUpdateJob.execute(peep.getUUID());
+            sensorUpdateJob.execute(peep);
 
             mHandler.postDelayed(mHandlerTask, mDbPollInterval);
         }
@@ -76,10 +77,39 @@ public class SensorFragment extends Fragment {
         mTextViewTimeUpdate = getView().findViewById(R.id.textViewTimeUpdate);
         mTextViewTemperature = getView().findViewById(R.id.textViewTemperature);
         mTextViewHumidity = getView().findViewById(R.id.textViewHumidity);
+        mTextViewMeasurementInterval = getView().findViewById(R.id.textViewMeasurementInterval);
+        mTextViewTemperatureOffset = getView().findViewById(R.id.textViewTemperatureOffset);
         mButtonPeepSelect = getView().findViewById(R.id.buttonPeepSelect);
+
+        SettingsManager.TemperatureUnits units = mSettingsManager.getTemperatureUnits();
+        float offset = peep.getLastHatch().getTemperatureOffsetCelsius();
+        mTemperatureOffsetCelcius = offset;
+        if (CELSIUS == units) {
+            String s = "Temperature Offset: " + offset + " ℃";
+            mTextViewTemperatureOffset.setText(s);
+        }
+        else if (FAHRENHEIT == units) {
+            offset *= 1.8;
+            String s = "Temperature Offset: " + offset + " ℉";
+            mTextViewTemperatureOffset.setText(s);
+        }
+
+        int interval = peep.getLastHatch().getMeasureIntervalMin();
+        if (0 == (interval % 60)) {
+            interval /= 60;
+            String s = "Measurement Interval: " + interval + " hours";
+            mTextViewMeasurementInterval.setText(s);
+        }
+        else {
+            String s = "Measurement Interval: " + interval + " minutes";
+            mTextViewMeasurementInterval.setText(s);
+        }
+
         mButtonPeepSelect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                stopRepeatingTask();
+
                 Fragment fragment = new PeepSelectFragment();
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
                 ft.replace(R.id.content_view, fragment);
@@ -88,7 +118,6 @@ public class SensorFragment extends Fragment {
             }
         });
 
-        mInfluxClient = new InfluxClient(mDbURL, mDbUser, mDbPassword, mDbName);
         startRepeatingTask();
     }
 
@@ -105,71 +134,58 @@ public class SensorFragment extends Fragment {
         mHandler.removeCallbacks(mHandlerTask);
     }
 
-    private class SensorUpdateJob extends AsyncTask<String, Void, InfluxClient.InfluxMeasurement> {
+    private class SensorUpdateJob extends AsyncTask<PeepUnit, Void, PeepMeasurement> {
 
         @Override
-        protected InfluxClient.InfluxMeasurement doInBackground(String... uuids) {
-            InfluxClient.InfluxMeasurement influxMeasurement = null;
+        protected PeepMeasurement doInBackground(PeepUnit... peeps) {
+            PeepUnit peepUnit = peeps[0];
 
-            for (int i = 0; i < uuids.length; i++) {
-                influxMeasurement = mInfluxClient.getMeasurement(uuids[i]);
-            }
+            String accessToken = RestApi.postUserAuth(
+                    peepUnit.getUserEmail(),
+                    peepUnit.getUserPassword());
 
-            return influxMeasurement;
+            PeepMeasurement peepMeasurement = RestApi.getPeepLastMeasure(
+                    accessToken,
+                    peepUnit);
+
+            return peepMeasurement;
         }
 
         @Override
-        protected void onPostExecute(InfluxClient.InfluxMeasurement influxMeasurement) {
-            if (null != influxMeasurement) {
-                try {
-                    String fmt = "";
+        protected void onPostExecute(PeepMeasurement peepMeasurement) {
+            try {
+                String fmt = "";
+                SettingsManager.TemperatureUnits units = mSettingsManager.getTemperatureUnits();
 
-                    final SettingsManager.TemperatureUnits CELSIUS =
-                            SettingsManager.TemperatureUnits.CELSIUS;
-                    final SettingsManager.TemperatureUnits FAHRENHEIT =
-                            SettingsManager.TemperatureUnits.FAHRENHEIT;
-                    SettingsManager.TemperatureUnits units = mSettingsManager.getTemperatureUnits();
-
-                    // Display Temperature value in the user specified units.
-                    if (CELSIUS == units) {
-                        fmt = String.format(
-                                Locale.US,
-                                "%.1f",
-                                influxMeasurement.temperature) + " ℃";
-                    }
-                    else if (FAHRENHEIT == units) {
-                        fmt = String.format(
-                                Locale.US,
-                                "%.1f",
-                                (influxMeasurement.temperature * 1.8) + 32.0) + " ℉";
-                    }
-                    mTextViewTemperature.setText(fmt);
-
-                    // Convert InfluxDB UTC times to the local time of the user.
-                    fmt = String.format(
-                            Locale.US, "%.1f",
-                            influxMeasurement.humidity) + " %";
-                    mTextViewHumidity.setText(fmt);
-
-                    // ISO 8601 time representation.
-                    DateFormat isoTimestamp = new SimpleDateFormat(
-                            "yyyy-MM-dd'T'HH:mm:ss'Z'",
-                            Locale.ENGLISH);
-                    // User readable time representation.
-                    DateFormat userTimestamp = new SimpleDateFormat(
-                            "MMM dd, yyyy HH:mm a",
-                            Locale.ENGLISH);
-
-                    isoTimestamp.setTimeZone(TimeZone.getTimeZone("UTC"));
-                    userTimestamp.setTimeZone(TimeZone.getDefault());
-                    Date date = isoTimestamp.parse(influxMeasurement.timestamp);
-                    String localTime = userTimestamp.format(date);
-                    String text = "Last Updated: " + localTime;
-                    mTextViewTimeUpdate.setText(text);
+                // Display Temperature value in the user specified units.
+                float t = peepMeasurement.getTemperature() + mTemperatureOffsetCelcius;
+                if (CELSIUS == units) {
+                    fmt = String.format(Locale.US, "%.1f", t) + " ℃";
                 }
-                catch (Exception e) {
-                    e.printStackTrace();
+                else if (FAHRENHEIT == units) {
+                    fmt = String.format(Locale.US, "%.1f", (t * 1.8) + 32.0) + " ℉";
                 }
+                mTextViewTemperature.setText(fmt);
+
+                // Convert InfluxDB UTC times to the local time of the user.
+                fmt = String.format(
+                        Locale.US, "%.1f",
+                        peepMeasurement.getmHumidity() * 1.0) + " %";
+                mTextViewHumidity.setText(fmt);
+
+                // User readable time representation.
+                DateFormat userTime = new SimpleDateFormat(
+                        "MMM dd, yyyy HH:mm a",
+                        Locale.ENGLISH);
+
+                userTime.setTimeZone(TimeZone.getDefault());
+                Date date = new Date(peepMeasurement.getUnixTimestamp() * 1000);
+                String localTime = userTime.format(date);
+                String text = "Last Updated: " + localTime;
+                mTextViewTimeUpdate.setText(text);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }

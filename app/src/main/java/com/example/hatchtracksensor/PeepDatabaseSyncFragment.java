@@ -81,7 +81,12 @@ public class PeepDatabaseSyncFragment extends Fragment {
                 String name = RestApi.getPeepName(accessToken, peepUnit);
                 peepUnit.setName(name);
 
-                // TODO: Get Hatches associated with a given Peep.
+                ArrayList<String> hatchUUIDs = RestApi.getHatchUUIDs(accessToken, peepUnit);
+                if (0 < hatchUUIDs.size()) {
+                    int last = hatchUUIDs.size() - 1;
+                    PeepHatch peepHatch = RestApi.getHatch(accessToken, hatchUUIDs.get(last));
+                    peepUnit.setHatch(peepHatch);
+                }
 
                 peepUnits.add(peepUnit);
             }

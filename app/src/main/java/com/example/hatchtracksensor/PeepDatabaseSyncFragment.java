@@ -107,7 +107,10 @@ public class PeepDatabaseSyncFragment extends Fragment {
                 ft.commit();
             }
             else {
-                Log.d("MREUTMAN", "TODO: fill this in");
+                Fragment fragment = new BluetoothFragment();
+                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                ft.replace(R.id.content_view, fragment);
+                ft.commit();
             }
         }
     }

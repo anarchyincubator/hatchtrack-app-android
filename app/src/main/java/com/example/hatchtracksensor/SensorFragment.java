@@ -85,12 +85,12 @@ public class SensorFragment extends Fragment {
         float offset = peep.getLastHatch().getTemperatureOffsetCelsius();
         mTemperatureOffsetCelcius = offset;
         if (CELSIUS == units) {
-            String s = "Temperature Offset: " + offset + " ℃";
+            String s = "Temperature Offset: " + String.format("%.2f", offset) + " ℃";
             mTextViewTemperatureOffset.setText(s);
         }
         else if (FAHRENHEIT == units) {
             offset *= 1.8;
-            String s = "Temperature Offset: " + offset + " ℉";
+            String s = "Temperature Offset: " + String.format("%.2f", offset) + " ℉";
             mTextViewTemperatureOffset.setText(s);
         }
 

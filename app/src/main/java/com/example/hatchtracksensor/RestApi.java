@@ -285,7 +285,7 @@ public class RestApi {
             peepHatch.setStartUnixTimestamp(json.getLong("startUnixTimestamp"));
             peepHatch.setEndUnixTimestamp(json.getLong("endUnixTimestamp"));
             peepHatch.setMeasureIntervalMin(json.getInt("measureIntervalMin"));
-            peepHatch.setTemperatureOffsetCelsius(json.getInt("temperatureOffsetCelsius"));
+            peepHatch.setTemperatureOffsetCelsius((float) json.getDouble("temperatureOffsetCelsius"));
         } catch (Exception e) {
             e.printStackTrace();
         }

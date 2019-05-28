@@ -76,6 +76,7 @@ public class LogInActivity extends AppCompatActivity {
             public void onSuccess(String response) {
                 mButtonSignIn.setText("Signed In!");
                 Intent intent = new Intent(LogInActivity.this, MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
             }
 

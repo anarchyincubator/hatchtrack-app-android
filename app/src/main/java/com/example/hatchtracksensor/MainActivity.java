@@ -51,7 +51,14 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.navPeepSelect) {
+        if (id == R.id.navMonitor) {
+            Fragment fragment = new SensorFragment();
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            ft.replace(R.id.content_view, fragment);
+            ft.addToBackStack(null);
+            ft.commit();
+        }
+        else if (id == R.id.navPeepSelect) {
             Fragment fragment = new PeepSelectFragment();
             FragmentTransaction ft = getFragmentManager().beginTransaction();
             ft.replace(R.id.content_view, fragment);

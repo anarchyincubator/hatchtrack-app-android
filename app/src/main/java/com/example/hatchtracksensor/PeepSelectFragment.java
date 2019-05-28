@@ -72,7 +72,7 @@ public class PeepSelectFragment extends Fragment {
                 new MyRecyclerViewAdapter.ItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                        final String[] action = {"Monitor", "Delete"};
+                        final String[] action = {"Monitor", "Configure", "Delete"};
                         final int peepSelect = position;
 
                         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
@@ -89,6 +89,14 @@ public class PeepSelectFragment extends Fragment {
                                     ft.commit();
                                 }
                                 else if (1 == which) {
+                                    mPeepUnitManager.setPeepUnitActive(peepSelect);
+                                    Fragment fragment = new HatchReconfigFragment();
+                                    FragmentTransaction ft = getFragmentManager().beginTransaction();
+                                    ft.replace(R.id.content_view, fragment);
+                                    ft.addToBackStack(null);
+                                    ft.commit();
+                                }
+                                else if (2 == which) {
                                     mRecyclerView.setVisibility(View.GONE);
                                     mAddPeep.hide();
 

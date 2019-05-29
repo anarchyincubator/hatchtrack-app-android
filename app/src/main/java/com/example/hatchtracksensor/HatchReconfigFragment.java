@@ -15,7 +15,7 @@ import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
-public class HatchConfigFragment extends Fragment {
+public class HatchReconfigFragment extends Fragment {
 
     private Button mButton;
     private ProgressBar mSpinner;
@@ -35,7 +35,7 @@ public class HatchConfigFragment extends Fragment {
     private int mMeasureIntervalMin;
     private float mTemperatureOffset;
 
-    public HatchConfigFragment() {
+    public HatchReconfigFragment() {
         // Required empty public constructor
     }
 
@@ -72,13 +72,30 @@ public class HatchConfigFragment extends Fragment {
         mRadioButtonFahrenheit = activity.findViewById(R.id.radioButtonTemperatureFahrenheit);
         mRadioButtonCelsius = activity.findViewById(R.id.radioButtonTemperatureCelsius);
 
-        mRadioButtonMinutes.setChecked(true);
-        SettingsManager.TemperatureUnits units = settingsManager.getTemperatureUnits();
-        if (CELSIUS == units) {
-            mRadioButtonCelsius.setChecked(true);
+        PeepUnit peepUnit = mPeepUnitManager.getPeepUnitActive();
+        mEditTextPeepName.setText(peepUnit.getName());
+
+        int interval = peepUnit.getLastHatch().getMeasureIntervalMin();
+        if ((0 == (interval % 60))) {
+            interval /= 60;
+            mRadioButtonHours.setChecked(true);
+            mEditTextMeasureIntervalMin.setText(Integer.toString(interval));
         }
         else {
+            mRadioButtonMinutes.setChecked(true);
+            mEditTextMeasureIntervalMin.setText(Integer.toString(interval));
+        }
+
+        SettingsManager.TemperatureUnits units = settingsManager.getTemperatureUnits();
+        float offset = peepUnit.getLastHatch().getTemperatureOffsetCelsius();
+        if (CELSIUS == units) {
+            mRadioButtonCelsius.setChecked(true);
+            mEditTextMeasureTempOffset.setText(Float.toString(offset));
+        }
+        else {
+            offset *= 1.8;
             mRadioButtonFahrenheit.setChecked(true);
+            mEditTextMeasureTempOffset.setText(Float.toString(offset));
         }
 
         mButton = activity.findViewById(R.id.buttonHatchConfigure);
@@ -120,7 +137,7 @@ public class HatchConfigFragment extends Fragment {
                 mRadioButtonFahrenheit.setEnabled(false);
                 mSpinner.setVisibility(View.VISIBLE);
 
-                PeepUnit peepUnit = mPeepUnitManager.getPeepUnit(0);
+                PeepUnit peepUnit = mPeepUnitManager.getPeepUnitActive();
                 peepUnit.setName(mPeepName);
                 mJob = new DbSyncJob();
                 mJob.execute(peepUnit);
@@ -138,16 +155,15 @@ public class HatchConfigFragment extends Fragment {
             String password = peepUnits[0].getUserPassword();
             PeepUnit peepUnit = peepUnits[0];
 
-            PeepHatch peepHatch = new PeepHatch();
-            peepHatch.setTemperatureOffsetCelsius(0);
+            PeepHatch peepHatch = peepUnit.getLastHatch();
             peepHatch.setMeasureIntervalMin(mMeasureIntervalMin);
             peepHatch.setTemperatureOffsetCelsius(mTemperatureOffset);
             peepHatch.setEndUnixTimestamp(2147483647);
+            peepUnit.setHatch(peepHatch);
 
             String accessToken = RestApi.postUserAuth(email, password);
-            RestApi.postUserNewPeep(accessToken, peepUnit);
             RestApi.postPeepName(accessToken, peepUnit);
-            RestApi.postNewPeepHatch(accessToken, peepUnit, peepHatch);
+            RestApi.postReconfigHatch(accessToken, peepHatch);
 
             return peepUnits;
         }

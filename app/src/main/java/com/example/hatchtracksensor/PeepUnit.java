@@ -1,7 +1,5 @@
 package com.example.hatchtracksensor;
 
-import java.util.ArrayList;
-
 public class PeepUnit {
     private String mName;
     private String mUUID;

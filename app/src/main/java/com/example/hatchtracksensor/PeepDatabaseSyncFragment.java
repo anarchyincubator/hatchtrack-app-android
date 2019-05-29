@@ -9,9 +9,7 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 
 public class PeepDatabaseSyncFragment extends Fragment {
@@ -107,7 +105,10 @@ public class PeepDatabaseSyncFragment extends Fragment {
                 ft.commit();
             }
             else {
-                Log.d("MREUTMAN", "TODO: fill this in");
+                Fragment fragment = new BluetoothFragment();
+                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                ft.replace(R.id.content_view, fragment);
+                ft.commit();
             }
         }
     }

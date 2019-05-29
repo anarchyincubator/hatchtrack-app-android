@@ -4,10 +4,10 @@ public class PeepMeasurement {
 
     private String mHatchUUID;
     private long mUnixTimestamp;
-    private int mHumidity;
-    private int mTemperature;
+    private double mHumidity;
+    private double mTemperature;
 
-    public PeepMeasurement(String hatchUUID, long unixTimestamp, int humidity, int temperature) {
+    public PeepMeasurement(String hatchUUID, long unixTimestamp, double humidity, double temperature) {
         mHatchUUID = hatchUUID;
         mUnixTimestamp = unixTimestamp;
         mHumidity = humidity;
@@ -18,7 +18,7 @@ public class PeepMeasurement {
 
     public long getUnixTimestamp() { return mUnixTimestamp; }
 
-    public int getmHumidity() { return mHumidity; }
+    public double getmHumidity() { return mHumidity; }
 
-    public int getTemperature() { return mTemperature; }
+    public double getTemperature() { return mTemperature; }
 }

@@ -9,12 +9,10 @@ import android.app.Fragment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -26,9 +24,7 @@ public class PeepSelectFragment extends Fragment {
     private ProgressBar mProgressBar;
     private FloatingActionButton mAddPeep;
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
-    private LinearLayoutManager layoutManager;
-    private MyRecyclerViewAdapter adapter;
+    private MyRecyclerViewAdapter mAdapter;
 
     public PeepSelectFragment() {
         // Required empty public constructor
@@ -67,12 +63,12 @@ public class PeepSelectFragment extends Fragment {
         // set up the RecyclerView
         mRecyclerView = getView().findViewById(R.id.recyclerViewPeepSelect);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        adapter = new MyRecyclerViewAdapter(getActivity(), peepNames);
-        adapter.setClickListener(
+        mAdapter = new MyRecyclerViewAdapter(getActivity(), peepNames);
+        mAdapter.setClickListener(
                 new MyRecyclerViewAdapter.ItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                        final String[] action = {"Monitor", "Delete"};
+                        final String[] action = {"Monitor", "Configure", "Delete"};
                         final int peepSelect = position;
 
                         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
@@ -89,6 +85,14 @@ public class PeepSelectFragment extends Fragment {
                                     ft.commit();
                                 }
                                 else if (1 == which) {
+                                    mPeepUnitManager.setPeepUnitActive(peepSelect);
+                                    Fragment fragment = new HatchReconfigFragment();
+                                    FragmentTransaction ft = getFragmentManager().beginTransaction();
+                                    ft.replace(R.id.content_view, fragment);
+                                    ft.addToBackStack(null);
+                                    ft.commit();
+                                }
+                                else if (2 == which) {
                                     mRecyclerView.setVisibility(View.GONE);
                                     mAddPeep.hide();
 
@@ -103,7 +107,7 @@ public class PeepSelectFragment extends Fragment {
                     }
                 }
         );
-        mRecyclerView.setAdapter(adapter);
+        mRecyclerView.setAdapter(mAdapter);
     }
 
     private class RemovePeepJob extends AsyncTask<PeepUnit, Void, PeepUnit[]> {

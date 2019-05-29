@@ -12,8 +12,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -39,7 +37,7 @@ public class SensorFragment extends Fragment {
 
     // Poll the database for new data at the provided time interval.
     private final static int mDbPollInterval = 1000 * 60 * 1; // 1 minute
-    float mTemperatureOffsetCelcius = 0.0f;
+    float mTemperatureOffsetCelsius = 0.0f;
 
     private Handler mHandler = new Handler();
     private Runnable mHandlerTask = new Runnable() {
@@ -83,14 +81,14 @@ public class SensorFragment extends Fragment {
 
         SettingsManager.TemperatureUnits units = mSettingsManager.getTemperatureUnits();
         float offset = peep.getLastHatch().getTemperatureOffsetCelsius();
-        mTemperatureOffsetCelcius = offset;
+        mTemperatureOffsetCelsius = offset;
         if (CELSIUS == units) {
-            String s = "Temperature Offset: " + offset + " ℃";
+            String s = "Temperature Offset: " + String.format("%.2f", offset) + " ℃";
             mTextViewTemperatureOffset.setText(s);
         }
         else if (FAHRENHEIT == units) {
             offset *= 1.8;
-            String s = "Temperature Offset: " + offset + " ℉";
+            String s = "Temperature Offset: " + String.format("%.2f", offset) + " ℉";
             mTextViewTemperatureOffset.setText(s);
         }
 
@@ -158,7 +156,7 @@ public class SensorFragment extends Fragment {
                 SettingsManager.TemperatureUnits units = mSettingsManager.getTemperatureUnits();
 
                 // Display Temperature value in the user specified units.
-                float t = peepMeasurement.getTemperature() + mTemperatureOffsetCelcius;
+                double t = peepMeasurement.getTemperature() + mTemperatureOffsetCelsius;
                 if (CELSIUS == units) {
                     fmt = String.format(Locale.US, "%.1f", t) + " ℃";
                 }
@@ -170,7 +168,7 @@ public class SensorFragment extends Fragment {
                 // Convert InfluxDB UTC times to the local time of the user.
                 fmt = String.format(
                         Locale.US, "%.1f",
-                        peepMeasurement.getmHumidity() * 1.0) + " %";
+                        peepMeasurement.getmHumidity()) + " %";
                 mTextViewHumidity.setText(fmt);
 
                 // User readable time representation.

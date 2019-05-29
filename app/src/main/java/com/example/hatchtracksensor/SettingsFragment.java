@@ -1,5 +1,8 @@
 package com.example.hatchtracksensor;
 
+import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.view.LayoutInflater;
@@ -14,6 +17,7 @@ public class SettingsFragment extends Fragment {
 
     private Spinner mSpinnerTemperature;
     private TextView mTextViewAccountEmail;
+    private TextView mTextViewVersion;
 
     private AccountManager mAccountManager;
     private SettingsManager mSettingsManager;
@@ -35,9 +39,19 @@ public class SettingsFragment extends Fragment {
 
         mAccountManager = new AccountManager(getContext());
         mSettingsManager = new SettingsManager();
-
         mTextViewAccountEmail = getView().findViewById(R.id.textViewAccountEmail);
+        mTextViewVersion = getView().findViewById(R.id.textViewVersion);
+
         mTextViewAccountEmail.setText(mAccountManager.getEmail());
+
+        try {
+            Context c = getContext();
+            PackageInfo info = c.getPackageManager().getPackageInfo(c.getPackageName(), 0);
+            String version = info.versionName;
+            mTextViewVersion.setText(version);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
 
         mSpinnerTemperature = getView().findViewById(R.id.spinnerTemperature);
         // Create an ArrayAdapter using the string array and a default spinner layout

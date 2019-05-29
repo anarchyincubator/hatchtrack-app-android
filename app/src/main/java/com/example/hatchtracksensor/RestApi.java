@@ -1,12 +1,8 @@
 package com.example.hatchtracksensor;
 
-import android.util.JsonReader;
-
 import com.amazonaws.util.IOUtils;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.InputStream;
@@ -456,8 +452,8 @@ public class RestApi {
             peepMeasurement = new PeepMeasurement(
                     json.getString("hatchUUID"),
                     json.getLong("unixTimestamp"),
-                    json.getInt("humidity"),
-                    json.getInt("temperature")
+                    json.getDouble("humidity"),
+                    json.getDouble("temperature")
             );
         } catch (Exception e) {
             e.printStackTrace();

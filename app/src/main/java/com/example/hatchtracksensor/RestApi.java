@@ -98,10 +98,7 @@ public class RestApi {
         boolean status = true;
 
         try {
-            JSONObject json = new JSONObject();
-            json.put("peepUUID", peepUUID);
-            String body = json.toString();
-            String requestURL = "https://db.hatchtrack.com:18888/api/v1/user/peep";
+            String requestURL = "https://db.hatchtrack.com:18888/api/v1/user/peep?peepUUID=" + peepUUID;
             URL url = new URL(requestURL);
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -110,15 +107,6 @@ public class RestApi {
             conn.setRequestMethod("DELETE");
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setRequestProperty(HEADER_ACCESS_TOKEN, accessToken);
-            conn.setDoOutput(true);
-
-            OutputStream out = conn.getOutputStream();
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
-            writer.write(body);
-
-            writer.flush();
-            writer.close();
-            out.close();
 
             int code = conn.getResponseCode();
             if (200 == code) {

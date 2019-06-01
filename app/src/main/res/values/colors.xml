@@ -8,4 +8,6 @@
     <color name="eggWhite">#FAFAFA</color>
     <color name="lightGrey">#F0F0F0</color>
     <color name="darkGrey">#999999</color>
+    <color name="redInactive">#C80000</color>
+    <color name="greenActive">#00C800</color>
 </resources>

@@ -16,18 +16,19 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="88dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="48dp"
             android:layout_marginEnd="8dp"
             android:text="@string/text_view_time_update"
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textViewHumidity" />
 
         <ImageView
             android:id="@+id/imageViewTemperature"
-            android:layout_width="122dp"
-            android:layout_height="122dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="88dp"
             android:layout_marginEnd="8dp"
@@ -39,8 +40,8 @@
 
         <ImageView
             android:id="@+id/imageViewHumidity"
-            android:layout_width="122dp"
-            android:layout_height="122dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="8dp"
@@ -109,5 +110,24 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/textViewTemperatureOffset"
             app:layout_constraintTop_toBottomOf="@+id/textViewTemperatureOffset" />
+
+        <ImageView
+            android:id="@+id/imageViewActiveState"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginBottom="8dp"
+            android:src="@drawable/ic_block_red"
+            app:layout_constraintBottom_toTopOf="@+id/textViewTimeUpdate"
+            app:layout_constraintStart_toStartOf="@+id/textViewTimeUpdate" />
+
+        <TextView
+            android:id="@+id/textViewActiveState"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Inactive"
+            app:layout_constraintBottom_toBottomOf="@+id/imageViewActiveState"
+            app:layout_constraintStart_toEndOf="@+id/imageViewActiveState"
+            app:layout_constraintTop_toTopOf="@+id/imageViewActiveState" />
     </android.support.constraint.ConstraintLayout>
 </FrameLayout>

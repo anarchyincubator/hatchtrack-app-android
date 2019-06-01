@@ -6,10 +6,12 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.os.Handler;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.text.DateFormat;
@@ -30,6 +32,8 @@ public class SensorFragment extends Fragment {
     private TextView mTextViewHumidity;
     private TextView mTextViewTemperatureOffset;
     private TextView mTextViewMeasurementInterval;
+    private TextView mTextViewActiveState;
+    private ImageView mImageViewActiveState;
     private Button mButtonPeepSelect;
 
     private PeepUnitManager mPeepUnitManager;
@@ -77,7 +81,9 @@ public class SensorFragment extends Fragment {
         mTextViewHumidity = getView().findViewById(R.id.textViewHumidity);
         mTextViewMeasurementInterval = getView().findViewById(R.id.textViewMeasurementInterval);
         mTextViewTemperatureOffset = getView().findViewById(R.id.textViewTemperatureOffset);
+        mTextViewActiveState = getView().findViewById(R.id.textViewActiveState);
         mButtonPeepSelect = getView().findViewById(R.id.buttonPeepSelect);
+        mImageViewActiveState = getView().findViewById(R.id.imageViewActiveState);
 
         SettingsManager.TemperatureUnits units = mSettingsManager.getTemperatureUnits();
         float offset = peep.getLastHatch().getTemperatureOffsetCelsius();
@@ -101,6 +107,22 @@ public class SensorFragment extends Fragment {
         else {
             String s = "Measurement Interval: " + interval + " minutes";
             mTextViewMeasurementInterval.setText(s);
+        }
+
+        long unixTime = System.currentTimeMillis() / 1000L;
+        if (unixTime < peep.getLastHatch().getEndUnixTimestamp()) {
+            mImageViewActiveState.setImageResource(R.drawable.ic_check_green);
+            mTextViewActiveState.setText("Active");
+            mTextViewActiveState.setTextColor(ContextCompat.getColor(
+                    getContext(),
+                    R.color.greenActive));
+        }
+        else {
+            mImageViewActiveState.setImageResource(R.drawable.ic_block_red);
+            mTextViewActiveState.setText("Inactive");
+            mTextViewActiveState.setTextColor(ContextCompat.getColor(
+                    getContext(),
+                    R.color.redInactive));
         }
 
         mButtonPeepSelect.setOnClickListener(new View.OnClickListener() {
@@ -132,28 +154,47 @@ public class SensorFragment extends Fragment {
         mHandler.removeCallbacks(mHandlerTask);
     }
 
-    private class SensorUpdateJob extends AsyncTask<PeepUnit, Void, PeepMeasurement> {
+    private class SensorUpdateJob extends AsyncTask<PeepUnit, Void, PeepUnit> {
 
         @Override
-        protected PeepMeasurement doInBackground(PeepUnit... peeps) {
-            PeepUnit peepUnit = peeps[0];
+        protected PeepUnit doInBackground(PeepUnit... peeps) {
+            PeepUnit peep = peeps[0];
 
             String accessToken = RestApi.postUserAuth(
-                    peepUnit.getUserEmail(),
-                    peepUnit.getUserPassword());
+                    peep.getUserEmail(),
+                    peep.getUserPassword());
 
             PeepMeasurement peepMeasurement = RestApi.getPeepLastMeasure(
                     accessToken,
-                    peepUnit);
+                    peep);
 
-            return peepMeasurement;
+            peep.setMeasurement(peepMeasurement);
+
+            return peep;
         }
 
         @Override
-        protected void onPostExecute(PeepMeasurement peepMeasurement) {
+        protected void onPostExecute(PeepUnit peep) {
             try {
-                String fmt = "";
+                PeepMeasurement peepMeasurement = peep.getMeasurement();
                 SettingsManager.TemperatureUnits units = mSettingsManager.getTemperatureUnits();
+                String fmt = "";
+
+                long unixTime = System.currentTimeMillis() / 1000L;
+                if (unixTime < peep.getLastHatch().getEndUnixTimestamp()) {
+                    mImageViewActiveState.setImageResource(R.drawable.ic_check_green);
+                    mTextViewActiveState.setText("Active");
+                    mTextViewActiveState.setTextColor(ContextCompat.getColor(
+                            getContext(),
+                            R.color.greenActive));
+                }
+                else {
+                    mImageViewActiveState.setImageResource(R.drawable.ic_block_red);
+                    mTextViewActiveState.setText("Inactive");
+                    mTextViewActiveState.setTextColor(ContextCompat.getColor(
+                            getContext(),
+                            R.color.redInactive));
+                }
 
                 // Display Temperature value in the user specified units.
                 double t = peepMeasurement.getTemperature() + mTemperatureOffsetCelsius;

@@ -6,6 +6,7 @@ public class PeepUnit {
     private String mUserEmail;
     private String mUserPassword;
     private PeepHatch mHatch;
+    private PeepMeasurement mMeasurement;
 
     public PeepUnit() {
         mName = "none";
@@ -18,6 +19,7 @@ public class PeepUnit {
         mUUID = uuid;
         mName = "none";
         mHatch = null;
+        mMeasurement = null;
     }
 
     public PeepUnit(String userEmail, String userPassword, String uuid, String name) {
@@ -26,6 +28,7 @@ public class PeepUnit {
         mUUID = uuid;
         mName = name;
         mHatch = null;
+        mMeasurement = null;
     }
 
     public String getName() { return mName; }
@@ -38,11 +41,15 @@ public class PeepUnit {
 
     public String getUserPassword() { return  mUserPassword; }
 
+    public PeepMeasurement getMeasurement() { return mMeasurement; }
+
     public void setName(String name) { mName = name; }
 
     public void setUUID(String uuid) { mUUID = uuid; }
 
     public void setHatch(PeepHatch hatch) { mHatch = hatch; }
+
+    public void setMeasurement(PeepMeasurement measurement) { mMeasurement = measurement; }
 
     public void setUserEmail(String email) { mUserEmail = email; }
 

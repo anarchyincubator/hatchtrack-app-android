@@ -19,12 +19,12 @@ import java.util.Arrays;
 public class PeepSelectFragment extends Fragment {
 
     private PeepUnitManager mPeepUnitManager;
-    private RemovePeepJob mJob;
 
     private ProgressBar mProgressBar;
     private FloatingActionButton mAddPeep;
     private RecyclerView mRecyclerView;
     private MyRecyclerViewAdapter mAdapter;
+    private PeepUnit mPeepUnit;
 
     public PeepSelectFragment() {
         // Required empty public constructor
@@ -68,7 +68,12 @@ public class PeepSelectFragment extends Fragment {
                 new MyRecyclerViewAdapter.ItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                        final String[] action = {"Monitor", "Configure", "Delete"};
+                        final String[] action = {
+                                "Monitor Peep",
+                                "Reconfigure Hatch",
+                                "New Hatch",
+                                "Stop Hatch",
+                                "Remove Peep"};
                         final int peepSelect = position;
 
                         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
@@ -93,13 +98,30 @@ public class PeepSelectFragment extends Fragment {
                                     ft.commit();
                                 }
                                 else if (2 == which) {
+                                    mProgressBar.setVisibility(View.VISIBLE);
                                     mRecyclerView.setVisibility(View.GONE);
                                     mAddPeep.hide();
 
-                                    PeepUnit peepUnit = mPeepUnitManager.getPeepUnit(peepSelect);
+                                    mPeepUnitManager.setPeepUnitActive(peepSelect);
+                                    mPeepUnit = mPeepUnitManager.getPeepUnit(peepSelect);
+
+                                    NewHatchJob job = new NewHatchJob();
+                                    job.execute(mPeepUnit);
+                                }
+                                else if (3 == which) {
                                     mProgressBar.setVisibility(View.VISIBLE);
-                                    mJob = new RemovePeepJob();
-                                    mJob.execute(peepUnit);
+                                    mRecyclerView.setVisibility(View.GONE);
+                                    mAddPeep.hide();
+
+                                    mPeepUnitManager.setPeepUnitActive(peepSelect);
+                                    mPeepUnit = mPeepUnitManager.getPeepUnit(peepSelect);
+
+                                    StopHatchJob job = new StopHatchJob();
+                                    job.execute(mPeepUnit);
+                                }
+                                else if (4 == which) {
+                                    mPeepUnit = mPeepUnitManager.getPeepUnit(peepSelect);
+                                    confirmDeleteDialogue();
                                 }
                             }
                         });
@@ -108,6 +130,29 @@ public class PeepSelectFragment extends Fragment {
                 }
         );
         mRecyclerView.setAdapter(mAdapter);
+    }
+
+    private void confirmDeleteDialogue() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        final String[] action = {"Yes", "No"};
+
+        builder.setTitle("Confirm remove?");
+        builder.setItems(action, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (0 == which) {
+                    mProgressBar.setVisibility(View.VISIBLE);
+                    mRecyclerView.setVisibility(View.GONE);
+                    mAddPeep.hide();
+                    RemovePeepJob job = new RemovePeepJob();
+                    job.execute(mPeepUnit);
+                }
+                else if (1 == which) {
+                    // do nothing
+                }
+            }
+        });
+        builder.show();
     }
 
     private class RemovePeepJob extends AsyncTask<PeepUnit, Void, PeepUnit[]> {
@@ -131,6 +176,60 @@ public class PeepSelectFragment extends Fragment {
         @Override
         protected void onPostExecute(PeepUnit[] peepUnits) {
             Fragment fragment = new PeepDatabaseSyncFragment();
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            ft.replace(R.id.content_view, fragment);
+            ft.addToBackStack(null);
+            ft.commit();
+        }
+    }
+
+    private class StopHatchJob extends AsyncTask<PeepUnit, Void, PeepUnit[]> {
+
+        @Override
+        protected PeepUnit[] doInBackground(PeepUnit... peepUnits) {
+            String email = peepUnits[0].getUserEmail();
+            String password = peepUnits[0].getUserPassword();
+            PeepUnit peepUnit = peepUnits[0];
+            PeepHatch peepHatch = peepUnit.getLastHatch();
+
+            String accessToken = RestApi.postUserAuth(email, password);
+            if (null != peepHatch) {
+                RestApi.postHatchEnd(accessToken, peepHatch);
+            }
+
+            return peepUnits;
+        }
+
+        @Override
+        protected void onPostExecute(PeepUnit[] peepUnits) {
+            Fragment fragment = new PeepDatabaseSyncFragment();
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            ft.replace(R.id.content_view, fragment);
+            ft.addToBackStack(null);
+            ft.commit();
+        }
+    }
+
+    private class NewHatchJob extends AsyncTask<PeepUnit, Void, PeepUnit[]> {
+
+        @Override
+        protected PeepUnit[] doInBackground(PeepUnit... peepUnits) {
+            String email = peepUnits[0].getUserEmail();
+            String password = peepUnits[0].getUserPassword();
+            PeepUnit peepUnit = peepUnits[0];
+            PeepHatch peepHatch = peepUnit.getLastHatch();
+
+            String accessToken = RestApi.postUserAuth(email, password);
+            if (null != peepHatch) {
+                RestApi.postHatchEnd(accessToken, peepHatch);
+            }
+
+            return peepUnits;
+        }
+
+        @Override
+        protected void onPostExecute(PeepUnit[] peepUnits) {
+            Fragment fragment = new HatchConfigFragment();
             FragmentTransaction ft = getFragmentManager().beginTransaction();
             ft.replace(R.id.content_view, fragment);
             ft.addToBackStack(null);

@@ -17,6 +17,7 @@ public class LogInActivity extends AppCompatActivity {
     private EditText mEditTextEmail;
     private EditText mEditTextPassword;
 
+    private Button mButtonForgotPassword; //DBOI
     AccountManager mAccountManager;
 
     String mEmail = "";
@@ -102,6 +103,22 @@ public class LogInActivity extends AppCompatActivity {
         Intent intent = new Intent(
                     Intent.ACTION_VIEW,
                     Uri.parse(mAccountManager.getAccountCreateURL()));
+
+        startActivity(intent);
+    }
+
+    public void onClickButtonForgotPassword(View v) //DBOI
+    {
+
+        /*
+         * For this routine, we leverage AWS Cognito's automatically generated web page for
+         * registering users. All we need to do is generate an Intent to open the URL. The AWS
+         * Cognito web page is designed to return us back to the LogInActivity app view once the
+         * user is done signing up.
+         */
+        Intent intent = new Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse(mAccountManager.getForgotPasswordURL()));
 
         startActivity(intent);
     }

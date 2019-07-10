@@ -23,6 +23,7 @@ public class AccountManager {
     private static SharedPreferences mSharedPreferences;
 
     // These values are obtained from AWS Cognito User Pool details on the Web Console.
+    private static final String mForgotPasswordURL = "https://hatchtrack.auth.us-west-2.amazoncognito.com/forgotPassword?response_type=token&client_id=34uo31crc6dbm4i11sgaqv03lb&redirect_uri=hatchtrack.sensor://main";
     private static final String mSignUpURL = "https://hatchtrack.auth.us-west-2.amazoncognito.com/signup?response_type=token&client_id=34uo31crc6dbm4i11sgaqv03lb&redirect_uri=hatchtrack.sensor://main";
     private static String mUserPoolId = "us-west-2_wOcu7aBMM";
     private static String mClientId = "34uo31crc6dbm4i11sgaqv03lb";
@@ -83,6 +84,10 @@ public class AccountManager {
 
     public final String getAccountCreateURL() {
         return mSignUpURL;
+    }
+
+    public final String getForgotPasswordURL() {
+        return mForgotPasswordURL;
     }
 
     private AuthenticationHandler authenticationHandler = new AuthenticationHandler()

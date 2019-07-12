@@ -10,6 +10,45 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <Switch
+            android:id="@+id/SwitchHumidityUnder"
+            android:layout_width="364dp"
+            android:layout_height="26dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/SwitchTextHumidityOverTitle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.483"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/SwitchTempTooCold" />
+
+        <Switch
+            android:id="@+id/SwitchHumidityOver"
+            android:layout_width="364dp"
+            android:layout_height="26dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/SwitchTextHumidityUnderTitle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.483"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/SwitchHumidityUnder" />
+
+        <Switch
+            android:id="@+id/SwitchTempTooCold"
+            android:layout_width="364dp"
+            android:layout_height="26dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/SwitchTextTooColdTitle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.483"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/SwitchTempTooHot" />
+
         <Spinner
             android:id="@+id/spinnerTemperature"
             android:layout_width="0dp"
@@ -74,7 +113,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/spinnerTemperature" />
+            app:layout_constraintTop_toBottomOf="@+id/SwitchHumidityOver" />
 
         <TextView
             android:id="@+id/textViewFragmentSettingsTitle"
@@ -98,6 +137,28 @@
             android:text="App Version"
             app:layout_constraintBottom_toTopOf="@+id/textViewVersion"
             app:layout_constraintStart_toStartOf="@+id/textViewVersion" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="@string/textViewNotificationsTitle"
+            app:layout_constraintBottom_toTopOf="@+id/SwitchTempTooHot"
+            app:layout_constraintStart_toStartOf="@+id/SwitchTempTooHot" />
+
+        <Switch
+            android:id="@+id/SwitchTempTooHot"
+            android:layout_width="364dp"
+            android:layout_height="26dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="64dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/SwitchTextTooHotTitle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.516"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/spinnerTemperature" />
 
     </android.support.constraint.ConstraintLayout>
 </FrameLayout>

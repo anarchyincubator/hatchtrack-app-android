@@ -11,7 +11,10 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
+import android.util.Log;
+import android.view.View.OnClickListener;
 
 public class SettingsFragment extends Fragment {
 
@@ -22,6 +25,11 @@ public class SettingsFragment extends Fragment {
     private AccountManager mAccountManager;
     private SettingsManager mSettingsManager;
 
+    private Switch mSwitchTempTooHot; //DBOI
+    private Switch mSwitchTempTooCold; //DBOI
+    private Switch mSwitchHumidityUnder; //DBOI
+    private Switch mSwitchHumidityOver; //DBOI
+
     public SettingsFragment() {
         // Required empty public constructor
     }
@@ -29,8 +37,83 @@ public class SettingsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.fragment_settings, container, false);
+
+        //Switch mSwitchTempTooHot = (Switch) v.findViewById(R.id.SwitchTempTooHot);
+        //Switch mSwitchTempTooHot = getView().findViewById(R.id.spinnerTemperature);
+        //mSwitchTempTooHot.setOnClickListener(this);
+
+
+
+        mSwitchTempTooHot = v.findViewById(R.id.SwitchTempTooHot);
+        mSwitchTempTooHot.setOnClickListener(
+                new Switch.OnClickListener() {
+                    public void onClick(View v) {
+                        String accessToken = RestApi.postUserAuth(mAccountManager.getEmail(), mAccountManager.getPassword());
+                        if(mSwitchTempTooHot.isChecked()) {
+                            Log.v("NOTIFICATIONS_SWITCH", "ON - SwitchTempTooHot");
+                        }else{
+                            Log.v("NOTIFICATIONS_SWITCH", "OFF - SwitchTempTooHot");
+                        }
+                        RestApi.postToggleSwitch(accessToken,mSwitchTempTooHot.isChecked(),
+                                mSwitchTempTooCold.isChecked(),mSwitchHumidityOver.isChecked(),mSwitchHumidityUnder.isChecked());
+
+                    }
+                }
+        );
+
+        mSwitchTempTooCold = v.findViewById(R.id.SwitchTempTooCold);
+        mSwitchTempTooCold.setOnClickListener(
+                new Switch.OnClickListener() {
+                    public void onClick(View v) {
+                        if(mSwitchTempTooCold.isChecked()) {
+                            Log.v("NOTIFICATIONS_SWITCH", "ON - SwitchTempTooCold");
+                        }else{
+                            Log.v("NOTIFICATIONS_SWITCH", "OFF - SwitchTempTooCold");
+                        }
+                    }
+                }
+        );
+
+        mSwitchHumidityUnder = v.findViewById(R.id.SwitchHumidityUnder);
+        mSwitchHumidityUnder.setOnClickListener(
+                new Switch.OnClickListener() {
+                    public void onClick(View v) {
+                        if(mSwitchHumidityUnder.isChecked()) {
+                            Log.v("NOTIFICATIONS_SWITCH", "ON - SwitchHumidityUnder");
+                        }else{
+                            Log.v("NOTIFICATIONS_SWITCH", "OFF - SwitchHumidityUnder");
+                        }
+                    }
+                }
+        );
+
+        mSwitchHumidityOver = v.findViewById(R.id.SwitchHumidityOver);
+        mSwitchHumidityOver.setOnClickListener(
+                new Switch.OnClickListener() {
+                    public void onClick(View v) {
+                        if(mSwitchHumidityOver.isChecked()) {
+                            Log.v("NOTIFICATIONS_SWITCH", "ON - SwitchHumidityOver");
+                        }else{
+                            Log.v("NOTIFICATIONS_SWITCH", "OFF - SwitchHumidityOver");
+                        }
+                    }
+                }
+        );
+
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_settings, container, false);
+        //return inflater.inflate(R.layout.fragment_settings, container, false);
+        return v;
+    }
+
+
+    public void onCheckedChanged(Switch sw, boolean isChecked) {
+
+        if(isChecked) {
+            //do stuff when Switch is ON
+        } else {
+            //do stuff when Switch if OFF
+        }
     }
 
     @Override
@@ -98,4 +181,9 @@ public class SettingsFragment extends Fragment {
             }
         });
     }
+//    @Override
+    public void onToggleSwitchTempTooHot(View v){
+        //Log.v("Switch State=");
+    }
+
 }

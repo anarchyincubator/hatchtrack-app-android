@@ -17,7 +17,6 @@ public class LogInActivity extends AppCompatActivity {
     private EditText mEditTextEmail;
     private EditText mEditTextPassword;
 
-    private Button mButtonForgotPassword; //DBOI
     AccountManager mAccountManager;
 
     String mEmail = "";

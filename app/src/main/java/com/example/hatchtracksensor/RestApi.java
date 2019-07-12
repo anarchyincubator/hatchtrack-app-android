@@ -11,6 +11,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import android.util.Log;
 
 public class RestApi {
     private static final String HEADER_ACCESS_TOKEN = "Access-Token";
@@ -56,10 +57,10 @@ public class RestApi {
     public static boolean postUserNewPeep(String accessToken, PeepUnit peepUnit) {
         String peepUUID = peepUnit.getUUID();
         boolean status = true;
-
         try {
+
             JSONObject json = new JSONObject();
-            json.put("peepUUID", peepUUID);
+            json.put("peepUUID", peepUUID.replace("\n", ""));
             String body = json.toString();
             String requestURL = "https://db.hatchtrack.com:18888/api/v1/user/peep";
             URL url = new URL(requestURL);
@@ -75,7 +76,6 @@ public class RestApi {
             OutputStream out = conn.getOutputStream();
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
             writer.write(body);
-
             writer.flush();
             writer.close();
             out.close();
@@ -86,6 +86,7 @@ public class RestApi {
             } else {
                 status = false;
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -157,8 +158,8 @@ public class RestApi {
 
         try {
             JSONObject json = new JSONObject();
-            json.put("peepUUID", peepUnit.getUUID());
-            json.put("peepName", peepUnit.getName());
+            json.put("peepUUID", peepUnit.getUUID().replace("\n", ""));
+            json.put("peepName", peepUnit.getName().replace("\n", ""));
             String body = json.toString();
             String requestURL = "https://db.hatchtrack.com:18888/api/v1/peep/name";
             URL url = new URL(requestURL);
@@ -282,7 +283,7 @@ public class RestApi {
 
         try {
             JSONObject json = new JSONObject();
-            json.put("hatchUUID", peepHatch.getUUID());
+            json.put("hatchUUID", peepHatch.getUUID().replace("\n", ""));
             String body = json.toString();
 
             String requestURL = "https://db.hatchtrack.com:18888/api/v1/hatch/end";
@@ -329,11 +330,14 @@ public class RestApi {
             float temperatureOffsetCelsius = peepHatch.getTemperatureOffsetCelsius();
 
             JSONObject json = new JSONObject();
-            json.put("peepUUID", peepUUID);
+            json.put("peepUUID", peepUUID.replace("\n", ""));
             json.put("endUnixTimestamp", endUnixTimestamp);
             json.put("measureIntervalMin", measureIntervalMin);
             json.put("temperatureOffsetCelsius", temperatureOffsetCelsius);
             String body = json.toString();
+
+            Log.i("postNewPeepHatch JSON: ", body);
+
 
             String requestURL = "https://db.hatchtrack.com:18888/api/v1/peep/hatch";
             URL url = new URL(requestURL);
@@ -453,5 +457,52 @@ public class RestApi {
         }
 
         return peepMeasurement;
+    }
+
+    public static boolean postToggleSwitch(String accessToken, boolean SwitchTempTooHotState, boolean SwitchTempTooColdState, boolean SwitchHumidityOverState, boolean SwitchHumidityUnderState) {
+        boolean status = true;
+
+        try {
+
+
+            JSONObject json = new JSONObject();
+            json.put("SwitchTempTooHotState", SwitchTempTooHotState);
+            json.put("SwitchTempTooColdState", SwitchTempTooColdState);
+            json.put("SwitchHumidityOverState", SwitchHumidityOverState);
+            json.put("SwitchHumidityUnderState", SwitchHumidityUnderState);
+            String body = json.toString();
+
+            String requestURL = "https://db.hatchtrack.com:18888/api/v1/user/notification_settings";
+            URL url = new URL(requestURL);
+
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty(HEADER_ACCESS_TOKEN, accessToken);
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+
+            OutputStream out = conn.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+            writer.write(body);
+
+            writer.flush();
+            writer.close();
+            out.close();
+
+            int code = conn.getResponseCode();
+            if (200 == code) {
+                status = true;
+            } else {
+                status = false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            status = false;
+        }
+
+        return status;
     }
 }

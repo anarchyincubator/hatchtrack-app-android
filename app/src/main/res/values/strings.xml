@@ -5,6 +5,8 @@
     <string name="text_view_password">Password</string>
     <string name="text_view_email">Account</string>
     <string name="button_sign_in">Sign In</string>
+    <string name="text_view_status"></string>
+    <string name="button_forgot_password">Forgot password?</string>
     <string name="button_create_account">Create Account</string>
     <string name="title_activity_main">Hatchtrack Sensor</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -19,7 +21,12 @@
     <string name="text_view_temperature_settings">Temperature Units</string>
     <string name="text_view_settings_title_account_email">Account Email</string>
     <string name="settings_title">Settings</string>
-    <string name="text_view_status">Please Log In</string>
+
+    <string name="SwitchTextTooHotTitle">Too hot (over 102F)</string>
+    <string name="SwitchTextTooColdTitle">Too cold (under 98 for > 2 hrs)</string>
+    <string name="SwitchTextHumidityOverTitle">Humidity under 25% for 1 day</string>
+    <string name="SwitchTextHumidityUnderTitle">Humidity over 60% for 1 day</string>
+    <string name="textViewNotificationsTitle">Notification Settings</string>
 
     <string-array name="temperature_units">
         <item>Fahrenheit (℉)</item>

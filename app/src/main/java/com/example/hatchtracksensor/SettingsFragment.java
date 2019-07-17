@@ -55,9 +55,10 @@ public class SettingsFragment extends Fragment {
                         }else{
                             Log.v("NOTIFICATIONS_SWITCH", "OFF - SwitchTempTooHot");
                         }
-                        RestApi.postToggleSwitch(accessToken,mSwitchTempTooHot.isChecked(),
-                                mSwitchTempTooCold.isChecked(),mSwitchHumidityOver.isChecked(),mSwitchHumidityUnder.isChecked());
-
+                        //API Call to update JSON obj to Postgres
+                        // format: {"SwitchTempTooHot":1,"SwitchTempTooCold":1,"SwitchHumidityUnder":0,"SwitchHumidityOver":0}
+                        //RestApi.postToggleSwitch(accessToken,mSwitchTempTooHot.isChecked(),mSwitchTempTooCold.isChecked(),mSwitchHumidityOver.isChecked(),mSwitchHumidityUnder.isChecked());
+                        //END API Call
                     }
                 }
         );

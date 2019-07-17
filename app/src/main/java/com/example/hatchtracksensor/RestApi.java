@@ -464,7 +464,6 @@ public class RestApi {
 
         try {
 
-
             JSONObject json = new JSONObject();
             json.put("SwitchTempTooHotState", SwitchTempTooHotState);
             json.put("SwitchTempTooColdState", SwitchTempTooColdState);

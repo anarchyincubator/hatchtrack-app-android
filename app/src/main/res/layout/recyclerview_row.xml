@@ -7,11 +7,10 @@
     android:orientation="horizontal"
     android:padding="20dp">
 
-    <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:background="@drawable/button_rounded_corners"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="#8CB1B1B1"
         android:gravity="center"
         android:padding="10dp">
 

@@ -64,8 +64,10 @@
         android:layout_marginTop="32dp"
         android:layout_marginEnd="24dp"
         android:background="@drawable/button_rounded_corners"
+        android:backgroundTint="#da4e35"
         android:onClick="onClickButtonSignIn"
         android:text="@string/button_sign_in"
+        android:textColor="#FFFFFF"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextPassword" />
@@ -78,8 +80,10 @@
         android:layout_marginTop="32dp"
         android:layout_marginEnd="24dp"
         android:background="@drawable/button_rounded_corners"
+        android:backgroundTint="#da4e35"
         android:onClick="onClickButtonCreateAccount"
         android:text="@string/button_create_account"
+        android:textColor="#FFFFFF"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/buttonSignIn" />

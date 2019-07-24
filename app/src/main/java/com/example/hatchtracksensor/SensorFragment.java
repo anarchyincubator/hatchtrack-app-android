@@ -49,7 +49,8 @@ public class SensorFragment extends Fragment {
         public void run() {
             PeepUnit peep = mPeepUnitManager.getPeepUnitActive();
 
-            mButtonPeepSelect.setText(peep.getName());
+           // mButtonPeepSelect.setText(peep.getName());
+            mButtonPeepSelect.setText("Hatch Data");
             SensorUpdateJob sensorUpdateJob = new SensorUpdateJob();
             sensorUpdateJob.execute(peep);
 
@@ -130,10 +131,19 @@ public class SensorFragment extends Fragment {
             public void onClick(View view) {
                 stopRepeatingTask();
 
+                /* Go back to Peep Select; DEPRECATED
                 Fragment fragment = new PeepSelectFragment();
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
                 ft.replace(R.id.content_view, fragment);
                 ft.addToBackStack(null);
+                ft.commit();
+                */
+
+                Fragment fragment = new PeepSensorDataFragment();
+                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                ft.replace(R.id.content_view, fragment);
+                ft.addToBackStack(null);
+                //ft.addToBackStack("SensorFragment");
                 ft.commit();
             }
         });

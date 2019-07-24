@@ -6,6 +6,20 @@
     android:layout_height="match_parent"
     tools:context=".LogInActivity">
 
+    <ProgressBar
+        android:id="@+id/progressBarLogin"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"></ProgressBar>
+
     <android.support.constraint.Guideline
         android:id="@+id/guideline3"
         android:layout_width="0dp"
@@ -64,7 +78,6 @@
         android:layout_marginTop="32dp"
         android:layout_marginEnd="24dp"
         android:background="@drawable/button_rounded_corners"
-        android:backgroundTint="#da4e35"
         android:onClick="onClickButtonSignIn"
         android:text="@string/button_sign_in"
         android:textColor="#FFFFFF"
@@ -80,7 +93,6 @@
         android:layout_marginTop="32dp"
         android:layout_marginEnd="24dp"
         android:background="@drawable/button_rounded_corners"
-        android:backgroundTint="#da4e35"
         android:onClick="onClickButtonCreateAccount"
         android:text="@string/button_create_account"
         android:textColor="#FFFFFF"

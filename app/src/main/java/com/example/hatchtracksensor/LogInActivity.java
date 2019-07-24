@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class LogInActivity extends AppCompatActivity {
@@ -16,6 +17,8 @@ public class LogInActivity extends AppCompatActivity {
     private TextView mTextViewStatus;
     private EditText mEditTextEmail;
     private EditText mEditTextPassword;
+
+    private ProgressBar mProgressBar;
 
     AccountManager mAccountManager;
 
@@ -33,6 +36,8 @@ public class LogInActivity extends AppCompatActivity {
         mEditTextEmail = findViewById(R.id.editTextEmail);
         mEditTextPassword = findViewById(R.id.editTextPassword);
 
+        mProgressBar = findViewById(R.id.progressBarLogin);
+        mProgressBar.setVisibility(View.GONE);
         /*
          * We have an Intent with non-null data if we're returning from account registration
          * launched in the onClickButtonCreateAccount function.
@@ -63,6 +68,9 @@ public class LogInActivity extends AppCompatActivity {
          * Grab the user submitted Email and Password, pass them off to the AccountManager which
          * will validate it with AWS Cognito.
          */
+
+        mProgressBar.setVisibility(View.VISIBLE);
+
         mEmail = mEditTextEmail.getText().toString();
         mPassword = mEditTextPassword.getText().toString();
 

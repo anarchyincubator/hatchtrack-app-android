@@ -47,7 +47,6 @@
             android:layout_marginEnd="24dp"
             android:layout_marginBottom="44dp"
             android:background="@drawable/button_rounded_corners"
-            android:backgroundTint="#da4e35"
             android:text="@string/button_scan"
             android:textColor="#FFFFFF"
             app:layout_constraintBottom_toBottomOf="parent"

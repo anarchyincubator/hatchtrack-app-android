@@ -10,11 +10,20 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+import java.util.Calendar;
+
 import android.util.Log;
+import android.text.format.DateFormat;
 
 public class RestApi {
     private static final String HEADER_ACCESS_TOKEN = "Access-Token";
+
+    public static JSONArray json_array;
 
     public static String postUserAuth(String email, String password) {
         String accessToken = "";
@@ -459,6 +468,69 @@ public class RestApi {
         return peepMeasurement;
     }
 
+    public static JSONArray getPeepTimeline(String accessToken, PeepUnit peepUnit, int timeline_mode) {
+        PeepMeasurement peepMeasurement;
+        String peepUUID = peepUnit.getUUID();
+        Log.i("TIMELINE 0:","getPeepTimeline: "+peepUUID);
+        try {
+            String startDate = "";
+            String endDate = "";
+
+
+            // User readable time representation.
+            java.text.DateFormat userTime = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+            userTime.setTimeZone(TimeZone.getDefault());
+
+            /*
+            Date date = new Date();
+            String localTime = userTime.format(date);
+            String text = "Last Updated: " + localTime;
+
+            Log.i("00000 localTime",text);
+            startDate = userTime.toString();
+            */
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.roll(Calendar.DAY_OF_YEAR, timeline_mode*-1+1);
+            Date today = calendar.getTime();
+            startDate = userTime.format(today);
+
+            calendar.add(Calendar.DAY_OF_YEAR, timeline_mode);
+            Date tomorrow = calendar.getTime();
+            endDate = userTime.format(tomorrow);
+
+            String reqURL = "https://db.hatchtrack.com:18888/api/v1/peep/measure/timeline?peepUUID=" + peepUUID + "&startDate="+ startDate + "&endDate="+ endDate + "&timeline_mode="+ timeline_mode;
+            Log.i("URL",reqURL);
+
+            URL url = new URL(reqURL);
+
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty(HEADER_ACCESS_TOKEN, accessToken);
+            conn.setDoInput(true);
+
+            InputStream in = new BufferedInputStream(conn.getInputStream());
+            String data= IOUtils.toString(in);
+
+            /*
+            JSONObject jsonResponse = new JSONObject(data);
+            json_array = jsonResponse.getJSONArray("timeline");
+
+            Log.i("JSON",json_array.toString());
+            */
+            json_array = new JSONArray(data);
+            Log.i("J", data);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+        return json_array;
+    }
+
+    //NOTIFICATIONS SETTINGS TOGGLE SWITCHES
     public static boolean postToggleSwitch(String accessToken, boolean SwitchTempTooHotState, boolean SwitchTempTooColdState, boolean SwitchHumidityOverState, boolean SwitchHumidityUnderState) {
         boolean status = true;
 

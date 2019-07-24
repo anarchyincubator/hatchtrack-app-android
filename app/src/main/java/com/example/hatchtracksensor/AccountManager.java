@@ -42,9 +42,13 @@ public class AccountManager {
                     mClientSecret,
                     Regions.US_WEST_2);
 
+
+
             mSharedPreferences = context.getSharedPreferences(
                     "UserData",
                     context.MODE_PRIVATE);
+
+            //mSharedPreferences.edit().clear().commit();
 
             // Grab the cached values.
             mEmail = mSharedPreferences.getString("email","");

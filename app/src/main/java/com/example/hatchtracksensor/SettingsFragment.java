@@ -1,10 +1,13 @@
 package com.example.hatchtracksensor;
 
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,11 +19,23 @@ import android.widget.TextView;
 import android.util.Log;
 import android.view.View.OnClickListener;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+
 public class SettingsFragment extends Fragment {
 
     private Spinner mSpinnerTemperature;
     private TextView mTextViewAccountEmail;
     private TextView mTextViewVersion;
+
+    private PeepUnitManager mPeepUnitManager;
 
     private AccountManager mAccountManager;
     private SettingsManager mSettingsManager;
@@ -29,6 +44,30 @@ public class SettingsFragment extends Fragment {
     private Switch mSwitchTempTooCold; //DBOI
     private Switch mSwitchHumidityUnder; //DBOI
     private Switch mSwitchHumidityOver; //DBOI
+
+    private Boolean onoff_SwitchTempTooHot;
+    private Boolean onoff_SwitchTempTooCold;
+    private Boolean onoff_SwitchHumidityUnder;
+    private Boolean onoff_SwitchHumidityOver;
+
+    // Poll the database for new data at the provided time interval.
+    private final static int mDbPollInterval = 1000 * 60 * 1; // 1 minute
+
+    private Handler mHandler = new Handler();
+    private Runnable mHandlerTask = new Runnable() {
+        @Override
+        public void run() {
+            mPeepUnitManager = new PeepUnitManager();
+            PeepUnit peep = mPeepUnitManager.getPeepUnitActive();
+            Log.i("TIMELINE Runnable:","mHandlerTask");
+
+            SettingsFragment.SensorUpdateJob sensorUpdateJob = new SettingsFragment.SensorUpdateJob();
+            sensorUpdateJob.execute(peep);
+
+            mHandler.postDelayed(mHandlerTask, mDbPollInterval);
+        }
+    };
+
 
     public SettingsFragment() {
         // Required empty public constructor
@@ -49,16 +88,7 @@ public class SettingsFragment extends Fragment {
         mSwitchTempTooHot.setOnClickListener(
                 new Switch.OnClickListener() {
                     public void onClick(View v) {
-                        String accessToken = RestApi.postUserAuth(mAccountManager.getEmail(), mAccountManager.getPassword());
-                        if(mSwitchTempTooHot.isChecked()) {
-                            Log.v("NOTIFICATIONS_SWITCH", "ON - SwitchTempTooHot");
-                        }else{
-                            Log.v("NOTIFICATIONS_SWITCH", "OFF - SwitchTempTooHot");
-                        }
-                        //API Call to update JSON obj to Postgres
-                        // format: {"SwitchTempTooHot":1,"SwitchTempTooCold":1,"SwitchHumidityUnder":0,"SwitchHumidityOver":0}
-                        //RestApi.postToggleSwitch(accessToken,mSwitchTempTooHot.isChecked(),mSwitchTempTooCold.isChecked(),mSwitchHumidityOver.isChecked(),mSwitchHumidityUnder.isChecked());
-                        //END API Call
+                        startRepeatingTask();
                     }
                 }
         );
@@ -67,11 +97,7 @@ public class SettingsFragment extends Fragment {
         mSwitchTempTooCold.setOnClickListener(
                 new Switch.OnClickListener() {
                     public void onClick(View v) {
-                        if(mSwitchTempTooCold.isChecked()) {
-                            Log.v("NOTIFICATIONS_SWITCH", "ON - SwitchTempTooCold");
-                        }else{
-                            Log.v("NOTIFICATIONS_SWITCH", "OFF - SwitchTempTooCold");
-                        }
+                        startRepeatingTask();
                     }
                 }
         );
@@ -80,11 +106,7 @@ public class SettingsFragment extends Fragment {
         mSwitchHumidityUnder.setOnClickListener(
                 new Switch.OnClickListener() {
                     public void onClick(View v) {
-                        if(mSwitchHumidityUnder.isChecked()) {
-                            Log.v("NOTIFICATIONS_SWITCH", "ON - SwitchHumidityUnder");
-                        }else{
-                            Log.v("NOTIFICATIONS_SWITCH", "OFF - SwitchHumidityUnder");
-                        }
+                        startRepeatingTask();
                     }
                 }
         );
@@ -93,11 +115,7 @@ public class SettingsFragment extends Fragment {
         mSwitchHumidityOver.setOnClickListener(
                 new Switch.OnClickListener() {
                     public void onClick(View v) {
-                        if(mSwitchHumidityOver.isChecked()) {
-                            Log.v("NOTIFICATIONS_SWITCH", "ON - SwitchHumidityOver");
-                        }else{
-                            Log.v("NOTIFICATIONS_SWITCH", "OFF - SwitchHumidityOver");
-                        }
+                        startRepeatingTask();
                     }
                 }
         );
@@ -120,6 +138,9 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle bundle) {
         super.onActivityCreated(bundle);
+
+
+
 
         mAccountManager = new AccountManager(getContext());
         mSettingsManager = new SettingsManager();
@@ -181,10 +202,89 @@ public class SettingsFragment extends Fragment {
                 // Nothing to do right now...
             }
         });
+
+        mPeepUnitManager = new PeepUnitManager();
+        PeepUnit peep = mPeepUnitManager.getPeepUnitActive();
+
+        SettingsFragment.GetNotificationSettings job = new SettingsFragment.GetNotificationSettings();
+        job.execute(peep);
+
     }
-//    @Override
-    public void onToggleSwitchTempTooHot(View v){
-        //Log.v("Switch State=");
+
+
+
+    private void startRepeatingTask() {
+        mHandlerTask.run();
+    }
+
+    private void stopRepeatingTask() {
+        mHandler.removeCallbacks(mHandlerTask);
+    }
+
+    private class SensorUpdateJob extends AsyncTask<PeepUnit, Void, PeepUnit> {
+        @Override
+        protected PeepUnit doInBackground(PeepUnit... peeps) {
+
+            PeepUnit peep = peeps[0];
+
+            String accessToken = RestApi.postUserAuth(mAccountManager.getEmail(), mAccountManager.getPassword());
+            RestApi.postToggleSwitch(accessToken,mSwitchTempTooHot.isChecked(),mSwitchTempTooCold.isChecked(),mSwitchHumidityOver.isChecked(),mSwitchHumidityUnder.isChecked());
+
+
+
+            return peep;
+        }
+
+        @Override
+        protected void onPostExecute(PeepUnit peep) {
+
+            try {
+                stopRepeatingTask();
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private class GetNotificationSettings extends AsyncTask<PeepUnit, Void, PeepUnit[]> {
+
+        @Override
+        protected PeepUnit[] doInBackground(PeepUnit... peepUnits) {
+
+            String accessToken = RestApi.postUserAuth(mAccountManager.getEmail(), mAccountManager.getPassword());
+
+            JSONObject push_notification_settings = RestApi.PushNotificationSettings(accessToken);
+
+            try{
+                onoff_SwitchTempTooHot = push_notification_settings.getBoolean("SwitchTempTooHotState");
+                onoff_SwitchTempTooCold = push_notification_settings.getBoolean("SwitchTempTooColdState");
+                onoff_SwitchHumidityUnder = push_notification_settings.getBoolean("SwitchHumidityUnderState");
+                onoff_SwitchHumidityOver = push_notification_settings.getBoolean("SwitchHumidityOverState");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return peepUnits;
+        }
+
+        @Override
+        protected void onPostExecute(PeepUnit[] peepUnits) {
+            try {
+                //json = timelineJSON;
+
+                if(onoff_SwitchTempTooHot == true)mSwitchTempTooHot.setChecked(true);
+                if(onoff_SwitchTempTooCold == true)mSwitchTempTooCold.setChecked(true);
+                if(onoff_SwitchHumidityOver == true)mSwitchHumidityOver.setChecked(true);
+                if(onoff_SwitchHumidityUnder == true)mSwitchHumidityUnder.setChecked(true);
+
+                stopRepeatingTask();
+
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }

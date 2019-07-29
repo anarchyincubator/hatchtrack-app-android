@@ -1,5 +1,7 @@
 package com.example.hatchtracksensor;
 
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
@@ -7,8 +9,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.ProgressBar;
+
 
 public class LogInActivity extends AppCompatActivity {
 
@@ -38,6 +41,7 @@ public class LogInActivity extends AppCompatActivity {
 
         mProgressBar = findViewById(R.id.progressBarLogin);
         mProgressBar.setVisibility(View.GONE);
+
         /*
          * We have an Intent with non-null data if we're returning from account registration
          * launched in the onClickButtonCreateAccount function.
@@ -64,13 +68,11 @@ public class LogInActivity extends AppCompatActivity {
 
     public void onClickButtonSignIn(View v)
     {
+        mProgressBar.setVisibility(View.VISIBLE);
         /*
          * Grab the user submitted Email and Password, pass them off to the AccountManager which
          * will validate it with AWS Cognito.
          */
-
-        mProgressBar.setVisibility(View.VISIBLE);
-
         mEmail = mEditTextEmail.getText().toString();
         mPassword = mEditTextPassword.getText().toString();
 
@@ -107,26 +109,23 @@ public class LogInActivity extends AppCompatActivity {
          * Cognito web page is designed to return us back to the LogInActivity app view once the
          * user is done signing up.
          */
+
         Intent intent = new Intent(
                     Intent.ACTION_VIEW,
                     Uri.parse(mAccountManager.getAccountCreateURL()));
 
         startActivity(intent);
-    }
 
-    public void onClickButtonForgotPassword(View v) //DBOI
-    {
-
+        //Intent intent = new Intent(LogInActivity.this, CreateAccActivity.class);
+        //startActivity(intent);
         /*
-         * For this routine, we leverage AWS Cognito's automatically generated web page for
-         * registering users. All we need to do is generate an Intent to open the URL. The AWS
-         * Cognito web page is designed to return us back to the LogInActivity app view once the
-         * user is done signing up.
-         */
-        Intent intent = new Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse(mAccountManager.getForgotPasswordURL()));
+        Fragment fragment = new NewAccountFragment();
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.replace(R.id.content_view, fragment);
+        ft.commit();
+*/
 
-        startActivity(intent);
+
+
     }
 }

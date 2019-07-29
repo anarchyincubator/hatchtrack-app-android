@@ -32,6 +32,39 @@
                 android:stretchColumns="1">
 
                 <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:background="#FFFFFF"
+                    android:gravity="center_vertical"
+                    android:padding="12.5dp">
+
+                    <TextView
+                        android:id="@+id/SensorTitleDate"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="---"
+
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:id="@+id/ImageViewHistory"
+                        android:layout_height="43dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="0dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="0.1"
+                        android:contentDescription="@string/image_view_temperature_content_description"
+                        android:gravity="right"
+                        android:src="@drawable/ic_history"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </TableRow>
+
+                <TableRow
                     android:id="@+id/tr_avg0"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
@@ -46,8 +79,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1.0"
                         android:gravity="center"
-                        android:text="Average"
 
+                        android:text="Average"
                         android:textSize="30sp"
                         android:textStyle="bold" />
                 </TableRow>
@@ -59,7 +92,8 @@
                     android:layout_weight="1"
                     android:background="#FFFFFF"
                     android:gravity="center_vertical"
-                    android:padding="12.5dp">
+                    android:paddingTop="12.5dp"
+                    android:paddingBottom="12.5dp">
 
                     <ImageView
                         android:id="@+id/imageViewTemperature"
@@ -137,7 +171,8 @@
                     android:layout_weight="1"
                     android:background="#FFFFFF"
                     android:gravity="center_vertical"
-                    android:padding="12.5dp">
+                    android:paddingTop="12.5dp"
+                    android:paddingBottom="12.5dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -156,7 +191,8 @@
                     android:layout_weight="1"
                     android:background="#FFFFFF"
                     android:gravity="center_vertical"
-                    android:padding="2.5dp">
+                    android:paddingTop="2.5dp"
+                    android:paddingBottom="2.5dp">
 
                     <TextView
                         android:id="@+id/textViewMaximumTemperature"
@@ -185,7 +221,8 @@
                     android:layout_weight="1"
                     android:background="#FFFFFF"
                     android:gravity="center_vertical"
-                    android:padding="12.5dp">
+                    android:paddingTop="12.5dp"
+                    android:paddingBottom="12.5dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -220,7 +257,8 @@
                     android:layout_weight="1"
                     android:background="#FFFFFF"
                     android:gravity="center_vertical"
-                    android:padding="12.5dp">
+                    android:paddingTop="12.5dp"
+                    android:paddingBottom="12.5dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -269,7 +307,8 @@
                     android:layout_weight="1"
                     android:background="#FFFFFF"
                     android:gravity="center_vertical"
-                    android:padding="12.5dp">
+                    android:paddingTop="12.5dp"
+                    android:paddingBottom="12.5dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -304,7 +343,8 @@
                     android:layout_weight="1"
                     android:background="#FFFFFF"
                     android:gravity="center_vertical"
-                    android:padding="12.5dp">
+                    android:paddingTop="12.5dp"
+                    android:paddingBottom="12.5dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -352,7 +392,8 @@
                     android:layout_weight="1"
                     android:background="#FFFFFF"
                     android:gravity="center_vertical"
-                    android:padding="12.5dp">
+                    android:paddingTop="12.5dp"
+                    android:paddingBottom="12.5dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -420,7 +461,14 @@
                     android:padding="2.5dp">
 
                     <TextView
-                        android:id="@+id/sensor_date_0"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.2"
+                        android:gravity="center"
+                        android:text="Date"
+                        android:textColor="#fff" />
+
+                    <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.2"
@@ -429,7 +477,6 @@
                         android:textColor="#fff" />
 
                     <TextView
-                        android:id="@+id/sensor_temperature_0"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight=".4"
@@ -438,7 +485,6 @@
                         android:textColor="#fff" />
 
                     <TextView
-                        android:id="@+id/sensor_humidity_0"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight=".4"

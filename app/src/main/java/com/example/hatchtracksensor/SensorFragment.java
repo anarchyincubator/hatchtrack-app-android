@@ -30,11 +30,13 @@ public class SensorFragment extends Fragment {
     private TextView mTextViewTimeUpdate;
     private TextView mTextViewTemperature;
     private TextView mTextViewHumidity;
+    private TextView mTextViewPeepName;
     private TextView mTextViewTemperatureOffset;
     private TextView mTextViewMeasurementInterval;
     private TextView mTextViewActiveState;
     private ImageView mImageViewActiveState;
     private Button mButtonPeepSelect;
+    private Button mButtonPeepConfig;
 
     private PeepUnitManager mPeepUnitManager;
     private SettingsManager mSettingsManager;
@@ -83,7 +85,9 @@ public class SensorFragment extends Fragment {
         mTextViewMeasurementInterval = getView().findViewById(R.id.textViewMeasurementInterval);
         mTextViewTemperatureOffset = getView().findViewById(R.id.textViewTemperatureOffset);
         mTextViewActiveState = getView().findViewById(R.id.textViewActiveState);
+        mTextViewPeepName = getView().findViewById(R.id.textViewPeepName);
         mButtonPeepSelect = getView().findViewById(R.id.buttonPeepSelect);
+        mButtonPeepConfig = getView().findViewById(R.id.buttonPeepConfig);
         mImageViewActiveState = getView().findViewById(R.id.imageViewActiveState);
 
         SettingsManager.TemperatureUnits units = mSettingsManager.getTemperatureUnits();
@@ -148,6 +152,24 @@ public class SensorFragment extends Fragment {
             }
         });
 
+        mButtonPeepConfig.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                stopRepeatingTask();
+
+
+
+                Fragment fragment = new PeepSelectFragment();
+                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                ft.replace(R.id.content_view, fragment);
+                ft.addToBackStack(null);
+                //ft.addToBackStack("SensorFragment");
+                ft.commit();
+            }
+        });
+
+
+
         startRepeatingTask();
     }
 
@@ -187,6 +209,7 @@ public class SensorFragment extends Fragment {
         protected void onPostExecute(PeepUnit peep) {
             try {
                 PeepMeasurement peepMeasurement = peep.getMeasurement();
+                mTextViewPeepName.setText(peep.getName());
                 SettingsManager.TemperatureUnits units = mSettingsManager.getTemperatureUnits();
                 String fmt = "";
 
@@ -224,7 +247,7 @@ public class SensorFragment extends Fragment {
 
                 // User readable time representation.
                 DateFormat userTime = new SimpleDateFormat(
-                        "MMM dd, yyyy HH:mm a",
+                        "MMM dd, yyyy h:mm a",
                         Locale.ENGLISH);
 
                 userTime.setTimeZone(TimeZone.getDefault());

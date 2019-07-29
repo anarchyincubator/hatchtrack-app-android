@@ -1,9 +1,12 @@
 <resources>
     <string name="app_name">Hatchtrack Sensor</string>
+    <string name="edit_text_name_default">Name</string>
     <string name="edit_text_email_default">Email</string>
     <string name="edit_text_password_default">Password</string>
+    <string name="edit_text_password_again">Password again</string>
     <string name="text_view_password">Password</string>
     <string name="text_view_email">Account</string>
+    <string name="text_view_email_new">New Account</string>
     <string name="button_sign_in">Sign In</string>
     <string name="text_view_status"></string>
     <string name="button_forgot_password">Forgot password?</string>
@@ -14,6 +17,7 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="button_peep_select">Peep Name</string>
     <string name="text_view_time_update">Waiting for update...</string>
+    <string name="text_view_peep_name">---</string>
     <string name="text_view_temperature">---</string>
     <string name="text_view_humidity">---</string>
     <string name="image_view_temperature_content_description">temperature icon</string>

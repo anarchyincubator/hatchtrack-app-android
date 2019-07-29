@@ -1,6 +1,8 @@
 package com.example.hatchtracksensor;
 
+import android.app.AlertDialog;
 import android.app.FragmentTransaction;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -17,6 +19,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+
+import android.widget.LinearLayout;
 
 import java.util.Locale;
 import java.util.TimeZone;
@@ -26,6 +31,7 @@ import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.ImageView;
 
 import org.json.JSONObject;
 import org.json.JSONArray;
@@ -58,6 +64,10 @@ public class PeepSensorDataFragment extends Fragment {
     private PeepUnitManager mPeepUnitManager;
     private SettingsManager mSettingsManager;
 
+    private ImageView mImageViewHistory;
+
+    private TextView mSensorTitleDate;
+
     private JSONArray json;
     private String table_sensor_data;
     float mTemperatureOffsetCelsius = 0.0f;
@@ -71,6 +81,10 @@ public class PeepSensorDataFragment extends Fragment {
     private double mSensorMinimumHumidity;
     private double mSensorMaximumHumidity;
     private double mSensorSDHumidity;
+
+    public String current_hatch_uuid;
+
+    public ArrayList<String> hatchList;
 
     // Poll the database for new data at the provided time interval.
     private final static int mDbPollInterval = 1000 * 60 * 1; // 1 minute
@@ -107,6 +121,8 @@ public class PeepSensorDataFragment extends Fragment {
     public void onActivityCreated(Bundle bundle) {
         super.onActivityCreated(bundle);
 
+        current_hatch_uuid = "";
+
         Log.i("TIMELINE SENSOR_DATA:","onActivityCreated");
         mPeepUnitManager = new PeepUnitManager();
         mSettingsManager = new SettingsManager();
@@ -126,6 +142,10 @@ public class PeepSensorDataFragment extends Fragment {
 
         mSensorScrollView = getView().findViewById(R.id.SensorScrollView);
 
+        mImageViewHistory = getView().findViewById(R.id.ImageViewHistory);
+
+        mSensorTitleDate = getView().findViewById(R.id.SensorTitleDate);
+
         current_tab_index = 1;
 
         TabLayout tabLayout = getView().findViewById(R.id.sensor_data_tabs);
@@ -133,12 +153,10 @@ public class PeepSensorDataFragment extends Fragment {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 mSensorScrollView.fullScroll(ScrollView.FOCUS_UP);
-
+                resetAvgTextViews();
                 //viewPager.setCurrentItem(tab.getPosition());
                 current_tab_index = tab.getPosition();
-                if(current_tab_index == 0){
-                    current_tab_index = 1;
-                }
+
                 if(current_tab_index == 2){
                     current_tab_index = 7;
                 }
@@ -148,7 +166,10 @@ public class PeepSensorDataFragment extends Fragment {
                 if(current_tab_index == 1){
                     current_tab_index = 3;
                 }
-                resetAvgTextViews();
+                if(current_tab_index == 0){
+                    current_tab_index = 1;
+                }
+
                 startRepeatingTask();
             }
             @Override
@@ -163,10 +184,65 @@ public class PeepSensorDataFragment extends Fragment {
                 //reloadSensorDataTable();
             }
         });
+
+        mImageViewHistory.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                buildHatchHistoryList();
+            }
+        });
+
         startRepeatingTask();
     }
 
     public void reloadSensorDataTable(){
+
+        PeepUnit peep = mPeepUnitManager.getPeepUnitActive();
+
+
+        JSONObject json_obj = null;
+        String val_time_start = "";
+        String val_time_end = "";
+
+        try {
+            json_obj = json.getJSONObject(json.length()-1);
+            val_time_start = json_obj.getString("time");
+            json_obj = json.getJSONObject(0);
+            val_time_end = json_obj.getString("time");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+
+        SimpleDateFormat userTimeParse = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
+        Date parse_date_start = null;
+        Date parse_date_end = null;
+        //userTime.setTimeZone(TimeZone.getDefault());
+        try{
+            parse_date_start = userTimeParse.parse(val_time_start);
+            parse_date_end = userTimeParse.parse(val_time_end);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+
+
+        SimpleDateFormat hourTimeFormat = new SimpleDateFormat("M/d", Locale.ENGLISH);
+        //hourTime.setTimeZone(TimeZone.getDefault());
+        val_time_start = hourTimeFormat.format(parse_date_start);
+        val_time_end = hourTimeFormat.format(parse_date_end);
+
+
+        String title_date = peep.getName()+"\n "+val_time_start+" - "+val_time_end;
+        if(val_time_start.equals(val_time_end))title_date = peep.getName()+"\n "+val_time_end;
+        mSensorTitleDate.setText(title_date);
+
+
+        SettingsManager.TemperatureUnits units = mSettingsManager.getTemperatureUnits();
+        float offset = peep.getLastHatch().getTemperatureOffsetCelsius();
+        mTemperatureOffsetCelsius = offset;
 
         for (int index = 0; index < json.length(); index++) {
             try {
@@ -190,19 +266,69 @@ public class PeepSensorDataFragment extends Fragment {
             }
         }
 
-        mSensorAverageTemperature = mSensorAverageTemperature/json.length();
-        mSensorAverageHumidity = mSensorAverageHumidity/json.length();
 
-        PeepUnit peep = mPeepUnitManager.getPeepUnitActive();
-        SettingsManager.TemperatureUnits units = mSettingsManager.getTemperatureUnits();
-        float offset = peep.getLastHatch().getTemperatureOffsetCelsius();
-        //float offset = 0.0f;
-        mTemperatureOffsetCelsius = offset;
-        // Display Temperature value in the user specified units.
 
-       //GET ACTUAL DATA double t = peepMeasurement.getTemperature() + mTemperatureOffsetCelsius;
+        //Log.i("sensor",json.length() + String.valueOf(mSensorAverageTemperature));
+        //mSensorAverageTemperature = mSensorAverageTemperature/json.length();
+        mSensorAverageTemperature = (mSensorMinimumTemperature + mSensorMaximumTemperature)/2;
+        //mSensorAverageHumidity = mSensorAverageHumidity/json.length();
+        mSensorAverageHumidity = (mSensorMinimumHumidity + mSensorMaximumHumidity)/2;
+        //Log.i("sensor 2",String.valueOf(mSensorAverageTemperature));
 
-        //double t = Double.parseDouble(mSensorAverageTemperature);
+        if (FAHRENHEIT == units) {
+            mSensorAverageTemperature = (mSensorAverageTemperature * 1.8) + 32.0;
+        }
+
+        //Log.i("sensor 3",String.valueOf(mSensorAverageTemperature)+" F");
+
+
+        float sd_temp = 0.0f;
+        float sd_humid = 0.0f;
+
+        float sd_temp_total = 0.0f;
+        float sd_humid_total = 0.0f;
+
+        for (int index = 0; index < json.length(); index++) {
+            try {
+                JSONObject curr_object = json.getJSONObject(index);
+                double val_temperature  = Double.valueOf(curr_object.getString("temperature"));
+                double val_humidity = Double.valueOf(curr_object.getString("humidity"));
+
+                if (FAHRENHEIT == units) {
+                    val_temperature = (val_temperature * 1.8) + 32.0;
+                }
+
+                //Log.i("val_humidity",String.valueOf(val_humidity));
+                //Log.i("val_temperature",String.valueOf(val_temperature) )   ;
+
+                sd_temp = ((float)val_temperature - (float)mSensorAverageTemperature) * ((float)val_temperature - (float)mSensorAverageTemperature);
+                //Log.i("val_temperature SQRD",String.valueOf(sd_temp));
+
+                sd_temp_total = sd_temp_total + sd_temp;
+
+                //Log.i("sd_temp",String.valueOf(sd_temp));
+                //Log.i("sd_temp_total",String.valueOf(sd_temp_total));
+
+                sd_humid = ((float)val_humidity - (float)mSensorAverageHumidity) * ((float)val_humidity - (float)mSensorAverageHumidity);
+                sd_humid_total = sd_humid_total + sd_humid;
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        //Log.i("00000000",String.valueOf(sd_humid_total) + " - json_length" + json.length());
+
+        //Log.i("12121212",String.valueOf(sd_temp_total));
+        sd_temp = sd_temp_total/json.length();
+        sd_humid = sd_humid_total/json.length();
+
+        //Log.i("11111111",String.valueOf(sd_temp));
+
+        sd_temp = (float)Math.sqrt(sd_temp);
+        sd_humid = (float)Math.sqrt(sd_humid);
+
+        //Log.i("22222222",String.valueOf(sd_temp));
+
 
         double t = mSensorAverageTemperature;
 
@@ -213,7 +339,8 @@ public class PeepSensorDataFragment extends Fragment {
             fmt = String.format(Locale.US, "%.1f", t) + " ℃";
         }
         else if (FAHRENHEIT == units) {
-            fmt = String.format(Locale.US, "%.1f", (t * 1.8) + 32.0) + " ℉";
+            //fmt = String.format(Locale.US, "%.1f", (t * 1.8) + 32.0) + " ℉";
+            fmt = String.format(Locale.US, "%.1f", t) + " ℉";
         }
         mTextViewTemperature.setText(fmt);
 
@@ -254,37 +381,25 @@ public class PeepSensorDataFragment extends Fragment {
         mTextViewMinimumTemperature.setText(fmt);
         mTextViewMinimumwHumidity.setText(fmt2);
 
-        t = -17.7778;
+        t = sd_temp;
         if (CELSIUS == units) {
             fmt = String.format(Locale.US, "%.1f", t) + " ℃";
         }
         else if (FAHRENHEIT == units) {
-            fmt = String.format(Locale.US, "%.1f", (t * 1.8) + 32.0) + " ℉";
+            //fmt = String.format(Locale.US, "%.1f", (t * 1.8) + 32.0) + " ℉";
+            fmt = String.format(Locale.US, "%.1f", t) + " ℉";
+
         }
-        t = 0.0;
+        t = sd_humid;
         fmt2 = String.format(
                 Locale.US, "%.1f",
                 t) + " %";
         mTextViewSDTemperature.setText(fmt);
         mTextViewSDHumidity.setText(fmt2);
 
-        //GET TABLE
+
+
         TableLayout ll = (TableLayout) getView().findViewById(R.id.tableSensorDataTimeline);
-
-        //CLEAR TABLE
-        int childCount = ll.getChildCount();
-        ll.removeViews(1, childCount - 1);
-
-        /*
-        table_sensor_data = "[{\"time\":\"PLACEHOLDER\",\"temperature\":\"98.0\",\"humidity\":\"59.4\"},{\"time\":\"10:00pm\",\"temperature\":\"98.0\",\"humidity\":\"48.5\"},{\"time\":\"9:00pm\",\"temperature\":\"102.0\",\"humidity\":\"41.6\"},{\"time\":\"8:00pm\",\"temperature\":\"101.0\",\"humidity\":\"48.5\"},{\"time\":\"7:00pm\",\"temperature\":\"98.0\",\"humidity\":\"56.4\"},{\"time\":\"6:00pm\",\"temperature\":\"99.0\",\"humidity\":\"59.4\"},{\"time\":\"5:00pm\",\"temperature\":\"104.0\",\"humidity\":\"52.5\"},{\"time\":\"4:00pm\",\"temperature\":\"99.0\",\"humidity\":\"49.5\"},{\"time\":\"3:00pm\",\"temperature\":\"100.0\",\"humidity\":\"56.4\"},{\"time\":\"2:00pm\",\"temperature\":\"99.0\",\"humidity\":\"50.5\"},{\"time\":\"1:00pm\",\"temperature\":\"99.0\",\"humidity\":\"45.5\"},{\"time\":\"12:00pm\",\"temperature\":\"99.0\",\"humidity\":\"43.6\"},{\"time\":\"11:00am\",\"temperature\":\"100.0\",\"humidity\":\"43.6\"},{\"time\":\"10:00am\",\"temperature\":\"98.0\",\"humidity\":\"42.6\"},{\"time\":\"9:00am\",\"temperature\":\"102.0\",\"humidity\":\"56.4\"},{\"time\":\"8:00am\",\"temperature\":\"104.0\",\"humidity\":\"50.5\"},{\"time\":\"7:00am\",\"temperature\":\"103.0\",\"humidity\":\"57.4\"},{\"time\":\"6:00am\",\"temperature\":\"102.0\",\"humidity\":\"51.5\"},{\"time\":\"5:00am\",\"temperature\":\"100.0\",\"humidity\":\"56.4\"},{\"time\":\"4:00am\",\"temperature\":\"102.0\",\"humidity\":\"49.5\"},{\"time\":\"3:00am\",\"temperature\":\"98.0\",\"humidity\":\"47.5\"},{\"time\":\"2:00am\",\"temperature\":\"101.0\",\"humidity\":\"54.5\"},{\"time\":\"1:00am\",\"temperature\":\"98.0\",\"humidity\":\"39.6\"},{\"time\":\"12:00am\",\"temperature\":\"102.0\",\"humidity\":\"52.5\"}]";
-        try {
-           json = new JSONArray(table_sensor_data);
-        } catch (JSONException e) {
-            //Log.e("Error", e.getMessage());
-            e.printStackTrace();
-        }
-        */
-        //json = new JSONObject(data);
 
         //RENDER TABLE ROWS
         for (int i = 0; i < json.length(); i++) {
@@ -304,28 +419,52 @@ public class PeepSensorDataFragment extends Fragment {
                 tbrow.setPadding(10, 10, 10, 10);
 
                 //Create Time TextView - 1).
+                TextView tv0 = new TextView(getActivity().getApplicationContext());
+                tv0.setLayoutParams(new TableRow.LayoutParams(
+                        TableRow.LayoutParams.MATCH_PARENT,
+                        TableRow.LayoutParams.WRAP_CONTENT, 0.2f));
+                tv0.setGravity(Gravity.CENTER_HORIZONTAL);
+
+                //Create Time TextView - 1).
                 TextView tv1 = new TextView(getActivity().getApplicationContext());
                 tv1.setLayoutParams(new TableRow.LayoutParams(
                         TableRow.LayoutParams.MATCH_PARENT,
                         TableRow.LayoutParams.WRAP_CONTENT, 0.2f));
                 tv1.setGravity(Gravity.CENTER_HORIZONTAL);
 
+                //DateTimeZone.setDefault(DateTimeZone.forID(TimeZone.getDefault().getID()))
 
                 String strDate = jsonObject.getString("time");
-                SimpleDateFormat userTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                //Log.i("strDate",strDate);
+                SimpleDateFormat userTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
                 Date parse_date = null;
-                userTime.setTimeZone(TimeZone.getDefault());
+                //userTime.setTimeZone(TimeZone.getDefault());
                 try{
-                    parse_date= userTime.parse(strDate);
+                    parse_date = userTime.parse(strDate);
+                    //Log.i("parse_date",parse_date.toString());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
+                TimeZone tz = TimeZone.getDefault();
+                //System.out.println("TimeZone   "+tz.getDisplayName(false, TimeZone.SHORT)+" Timezon id :: " +tz.getID());
 
-                SimpleDateFormat hourTime = new SimpleDateFormat("M/d - h:mm a");
-                hourTime.setTimeZone(TimeZone.getDefault());
+                SimpleDateFormat hourTime = new SimpleDateFormat("M/d", Locale.ENGLISH);
+                //hourTime.setTimeZone(TimeZone.getDefault());
                 String localTime = hourTime.format(parse_date);
                 //String text = "Last Updated: " + localTime;
+
+                tv0.setTextSize(16.0f);
+                tv0.setText(localTime);
+                tv0.setTypeface(tv0.getTypeface(), tv0.getTypeface().BOLD);
+
+                tbrow.addView(tv0);
+
+                hourTime = new SimpleDateFormat("h:mm a",
+                        Locale.ENGLISH);
+                //hourTime.setTimeZone(TimeZone.getDefault());
+                //hourTime.setTimeZone(TimeZone.getTimeZone("PST"));
+                localTime = hourTime.format(parse_date);
 
                 tv1.setTextSize(16.0f);
                 tv1.setText(localTime);
@@ -402,6 +541,15 @@ public class PeepSensorDataFragment extends Fragment {
         // Do something?
     }
 
+    private void clearTable(){
+        //GET TABLE
+        TableLayout ll = (TableLayout) getView().findViewById(R.id.tableSensorDataTimeline);
+
+        //CLEAR TABLE
+        int childCount = ll.getChildCount();
+        ll.removeViews(1, childCount - 1);
+    }
+
     private void startRepeatingTask() {
         mHandlerTask.run();
     }
@@ -411,6 +559,7 @@ public class PeepSensorDataFragment extends Fragment {
     }
 
     private void resetAvgTextViews(){
+        clearTable();
         mTextViewTemperature.setText("---");
         mTextViewHumidity.setText("---");
         mTextViewMaximumTemperature.setText("---");
@@ -419,6 +568,7 @@ public class PeepSensorDataFragment extends Fragment {
         mTextViewMinimumwHumidity.setText("---");
         mTextViewSDTemperature.setText("---");
         mTextViewSDHumidity.setText("---");
+        mSensorTitleDate.setText("---");
     }
 
     private class SensorUpdateJob extends AsyncTask<PeepUnit, Void, PeepUnit> {
@@ -427,6 +577,7 @@ public class PeepSensorDataFragment extends Fragment {
 
             PeepUnit peep = peeps[0];
 
+            Log.i("accessToken:","accessToken ");
             String accessToken = RestApi.postUserAuth(
                     peep.getUserEmail(),
                     peep.getUserPassword());
@@ -436,62 +587,130 @@ public class PeepSensorDataFragment extends Fragment {
 
             JSONArray timelineJSON = RestApi.getPeepTimeline(
                     accessToken,
-                    peep,current_tab_index);
+                    peep,current_tab_index,current_hatch_uuid);
 
             json = timelineJSON;
             Log.i("JSON - TABLE ",timelineJSON.toString());
 
             //peep.setMeasurement(peepMeasurement);
 
+            hatchList = RestApi.getHatchUUIDs(accessToken, peep);
+            Collections.reverse(hatchList);
             return peep;
         }
 
         @Override
         protected void onPostExecute(PeepUnit peep) {
+
             try {
                 //json = timelineJSON;
 
-                PeepMeasurement peepMeasurement = peep.getMeasurement();
-                SettingsManager.TemperatureUnits units = mSettingsManager.getTemperatureUnits();
-                String fmt = "";
+                if(json.length() != 0) {
+                    PeepMeasurement peepMeasurement = peep.getMeasurement();
+                    SettingsManager.TemperatureUnits units = mSettingsManager.getTemperatureUnits();
+                    String fmt = "";
 
-                long unixTime = System.currentTimeMillis() / 1000L;
+                    long unixTime = System.currentTimeMillis() / 1000L;
 
 
-                // Display Temperature value in the user specified units.
-                double t = peepMeasurement.getTemperature() + mTemperatureOffsetCelsius;
-                if (CELSIUS == units) {
-                    fmt = String.format(Locale.US, "%.1f", t) + " ℃";
+                    // Display Temperature value in the user specified units.
+                    double t = peepMeasurement.getTemperature() + mTemperatureOffsetCelsius;
+                    if (CELSIUS == units) {
+                        fmt = String.format(Locale.US, "%.1f", t) + " ℃";
+                    } else if (FAHRENHEIT == units) {
+                        fmt = String.format(Locale.US, "%.1f", (t * 1.8) + 32.0) + " ℉";
+                    }
+                    mTextViewTemperature.setText(fmt);
+
+                    // Convert InfluxDB UTC times to the local time of the user.
+                    fmt = String.format(
+                            Locale.US, "%.1f",
+                            peepMeasurement.getmHumidity()) + " %";
+                    mTextViewHumidity.setText(fmt);
+
+                    // User readable time representation.
+                    DateFormat userTime = new SimpleDateFormat(
+                            "MMM dd, yyyy HH:mm a",
+                            Locale.ENGLISH);
+
+                    userTime.setTimeZone(TimeZone.getDefault());
+                    Date date = new Date(peepMeasurement.getUnixTimestamp() * 1000);
+                    String localTime = userTime.format(date);
+                    String text = "Last Updated: " + localTime;
+
+                    Log.i("TIMELINE onpost: ", text + " " + fmt);
+
+                    reloadSensorDataTable();
                 }
-                else if (FAHRENHEIT == units) {
-                    fmt = String.format(Locale.US, "%.1f", (t * 1.8) + 32.0) + " ℉";
-                }
-                mTextViewTemperature.setText(fmt);
-
-                // Convert InfluxDB UTC times to the local time of the user.
-                fmt = String.format(
-                        Locale.US, "%.1f",
-                        peepMeasurement.getmHumidity()) + " %";
-                mTextViewHumidity.setText(fmt);
-
-                // User readable time representation.
-                DateFormat userTime = new SimpleDateFormat(
-                        "MMM dd, yyyy HH:mm a",
-                        Locale.ENGLISH);
-
-                userTime.setTimeZone(TimeZone.getDefault());
-                Date date = new Date(peepMeasurement.getUnixTimestamp() * 1000);
-                String localTime = userTime.format(date);
-                String text = "Last Updated: " + localTime;
-
-                Log.i("TIMELINE onpost: ",text+" "+fmt);
-
-                reloadSensorDataTable();
 
             }
             catch (Exception e) {
                 e.printStackTrace();
             }
         }
+    }
+    public void buildHatchHistoryList(){
+
+        String[] mStringArray = new String[hatchList.size()];
+        mStringArray = hatchList.toArray(mStringArray);
+
+        final String[] action = mStringArray;
+        //final int peepSelect = position;
+        //final float length = (float)action.length-1;
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Hatch Data");
+        builder.setItems(action, new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Log.i("BUILDER", String.valueOf(which));
+
+                current_hatch_uuid = hatchList.get(which);
+                if(String.valueOf(which).equals("0"))current_hatch_uuid = "";
+                Log.i("current_hatch_uuid",current_hatch_uuid);
+                resetAvgTextViews();
+                //startRepeatingTask();
+                TabLayout tabLayout = getView().findViewById(R.id.sensor_data_tabs);
+                if(tabLayout.getSelectedTabPosition() != 3) {
+                    TabLayout.Tab tab = tabLayout.getTabAt(3);
+                    tab.select();
+                }else{
+                    startRepeatingTask();
+                }
+                if(current_hatch_uuid.equals("")){
+                    enableTabs();
+                    TabLayout.Tab tab = tabLayout.getTabAt(0);
+                    tab.select();
+                }else{
+                    disabledTabs();
+                }
+            }
+        });
+        builder.show();
+    }
+
+    public void disabledTabs(){
+        TabLayout tabLayout = getView().findViewById(R.id.sensor_data_tabs);
+
+        LinearLayout tabStrip = ((LinearLayout)tabLayout.getChildAt(0));
+        tabStrip.setEnabled(false);
+        for(int i = 0; i < tabStrip.getChildCount(); i++) {
+            if(i<3) {
+                tabStrip.getChildAt(i).setClickable(false);
+            }
+        }
+    }
+
+    public void enableTabs(){
+        TabLayout tabLayout = getView().findViewById(R.id.sensor_data_tabs);
+        LinearLayout tabStrip = ((LinearLayout)tabLayout.getChildAt(0));
+        tabStrip.setEnabled(true);
+        for(int i = 0; i < tabStrip.getChildCount(); i++) {
+            tabStrip.getChildAt(i).setClickable(true);
+        }
+    }
+
+    public void popupHistorySelector(){
+
     }
 }

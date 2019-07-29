@@ -251,11 +251,38 @@ public class RestApi {
             for (int i = 0; i < array.length(); i++) {
                 list.add(array.getString(i));
             }
+
+
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         return list;
+    }
+
+    public static JSONObject PushNotificationSettings(String accessToken){
+        JSONObject json = null;
+
+        try {
+            String reqURL = "https://db.hatchtrack.com:18888/api/v1/user/push_notification_settings";
+            URL url = new URL(reqURL);
+
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty(HEADER_ACCESS_TOKEN, accessToken);
+            conn.setDoInput(true);
+
+            InputStream in = new BufferedInputStream(conn.getInputStream());
+            String data = IOUtils.toString(in);
+            json = new JSONObject(data);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return json;
     }
 
     public static PeepHatch getHatch(String accessToken, String hatchUUID) {
@@ -468,27 +495,27 @@ public class RestApi {
         return peepMeasurement;
     }
 
-    public static JSONArray getPeepTimeline(String accessToken, PeepUnit peepUnit, int timeline_mode) {
+    public static JSONArray getPeepTimeline(String accessToken, PeepUnit peepUnit, int timeline_mode, String hatchUUID) {
         PeepMeasurement peepMeasurement;
-        String peepUUID = peepUnit.getUUID();
-        Log.i("TIMELINE 0:","getPeepTimeline: "+peepUUID);
+
+        Log.i("TIMELINE 0:","gethatchUUIDTimeline: "+hatchUUID);
+        int last = 0;
+        if(hatchUUID.equals("")) {
+            ArrayList<String> hatchUUIDs = RestApi.getHatchUUIDs(accessToken, peepUnit);
+            if (0 < hatchUUIDs.size()) {
+                last = hatchUUIDs.size() - 1;
+            }
+            hatchUUIDs.get(last);
+            hatchUUID = hatchUUIDs.get(last).toString();
+        }
+        Log.i("TIMELINE 1:","gethatchUUIDTimeline: "+hatchUUID);
         try {
             String startDate = "";
             String endDate = "";
 
-
             // User readable time representation.
             java.text.DateFormat userTime = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
             userTime.setTimeZone(TimeZone.getDefault());
-
-            /*
-            Date date = new Date();
-            String localTime = userTime.format(date);
-            String text = "Last Updated: " + localTime;
-
-            Log.i("00000 localTime",text);
-            startDate = userTime.toString();
-            */
 
             Calendar calendar = Calendar.getInstance();
             calendar.roll(Calendar.DAY_OF_YEAR, timeline_mode*-1+1);
@@ -499,7 +526,7 @@ public class RestApi {
             Date tomorrow = calendar.getTime();
             endDate = userTime.format(tomorrow);
 
-            String reqURL = "https://db.hatchtrack.com:18888/api/v1/peep/measure/timeline?peepUUID=" + peepUUID + "&startDate="+ startDate + "&endDate="+ endDate + "&timeline_mode="+ timeline_mode;
+            String reqURL = "https://db.hatchtrack.com:18888/api/v1/peep/measure/timeline?hatchUUID=" + hatchUUID + "&startDate="+ startDate + "&endDate="+ endDate + "&timeline_mode="+ timeline_mode;
             Log.i("URL",reqURL);
 
             URL url = new URL(reqURL);
@@ -537,11 +564,13 @@ public class RestApi {
         try {
 
             JSONObject json = new JSONObject();
-            json.put("SwitchTempTooHotState", SwitchTempTooHotState);
-            json.put("SwitchTempTooColdState", SwitchTempTooColdState);
-            json.put("SwitchHumidityOverState", SwitchHumidityOverState);
-            json.put("SwitchHumidityUnderState", SwitchHumidityUnderState);
+            json.put("SwitchTempTooHotState", Boolean.valueOf(SwitchTempTooHotState));
+            json.put("SwitchTempTooColdState", Boolean.valueOf(SwitchTempTooColdState));
+            json.put("SwitchHumidityOverState", Boolean.valueOf(SwitchHumidityOverState));
+            json.put("SwitchHumidityUnderState", Boolean.valueOf(SwitchHumidityUnderState));
             String body = json.toString();
+
+            Log.i("postToggleSwitch: ", body);
 
             String requestURL = "https://db.hatchtrack.com:18888/api/v1/user/notification_settings";
             URL url = new URL(requestURL);

@@ -45,6 +45,11 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".CreateAccActivity"
+            android:label="@string/title_activity_main">
+        </activity>
+
     </application>
 
 </manifest>

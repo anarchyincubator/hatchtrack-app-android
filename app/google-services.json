@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "319192432397",
+    "firebase_url": "https://hatchtrack-6dae4.firebaseio.com",
+    "project_id": "hatchtrack-6dae4",
+    "storage_bucket": "hatchtrack-6dae4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:319192432397:android:46098b00202994ec",
+        "android_client_info": {
+          "package_name": "com.widgt.hatchtrack"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "319192432397-pirs4nmcfg5nbkrjcba58h5uheol88i8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA2WVFkb-w1oseHslryFzC7_KgxdA7H7Dw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "319192432397-pirs4nmcfg5nbkrjcba58h5uheol88i8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

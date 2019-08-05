@@ -74,14 +74,14 @@
                     android:padding="12.5dp">
 
                     <TextView
-                        android:id="@+id/sensor_title_average"
+                        android:id="@+id/textViewTitleAverage"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1.0"
                         android:gravity="center"
 
-                        android:text="Average"
-                        android:textSize="30sp"
+                        android:text="Today's Average"
+                        android:textSize="22sp"
                         android:textStyle="bold" />
                 </TableRow>
 
@@ -97,6 +97,7 @@
 
                     <ImageView
                         android:id="@+id/imageViewTemperature"
+                        android:layout_width="167dp"
                         android:layout_height="100dp"
                         android:layout_marginStart="8dp"
                         android:layout_marginTop="0dp"
@@ -110,6 +111,7 @@
 
                     <ImageView
                         android:id="@+id/imageViewHumidity"
+                        android:layout_width="151dp"
                         android:layout_height="100dp"
                         android:layout_marginStart="8dp"
                         android:layout_marginTop="0dp"
@@ -175,13 +177,14 @@
                     android:paddingBottom="12.5dp">
 
                     <TextView
+                        android:id="@+id/textViewTitleMax"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1.0"
                         android:gravity="center"
-                        android:text="Maximum"
 
-                        android:textSize="30sp"
+                        android:text="Today's Maximum"
+                        android:textSize="22sp"
                         android:textStyle="bold" />
                 </TableRow>
 
@@ -261,13 +264,14 @@
                     android:paddingBottom="12.5dp">
 
                     <TextView
+                        android:id="@+id/textViewTitleMin"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1.0"
-                        android:gravity="center"
-                        android:text="Minimum"
 
-                        android:textSize="30sp"
+                        android:gravity="center"
+                        android:text="Today's Minimum"
+                        android:textSize="22sp"
                         android:textStyle="bold" />
                 </TableRow>
 
@@ -347,11 +351,12 @@
                     android:paddingBottom="12.5dp">
 
                     <TextView
+                        android:id="@+id/textViewTitleSD"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1.0"
                         android:gravity="center"
-                        android:text="Standard Deviation"
+                        android:text="Avg. Deviation"
                         android:textSize="22sp"
                         android:textStyle="bold" />
                 </TableRow>
@@ -514,7 +519,7 @@
         <android.support.design.widget.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="1 Day" />
+            android:text="Today" />
 
         <android.support.design.widget.TabItem
             android:layout_width="wrap_content"

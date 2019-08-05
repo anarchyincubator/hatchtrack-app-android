@@ -92,6 +92,7 @@ public class LogInActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(String response) {
+                mProgressBar.setVisibility(View.GONE);
                 mTextViewStatus.setText("Invalid Email or Password");
                 mTextViewStatus.setVisibility(View.VISIBLE);
 
@@ -108,22 +109,16 @@ public class LogInActivity extends AppCompatActivity {
          * registering users. All we need to do is generate an Intent to open the URL. The AWS
          * Cognito web page is designed to return us back to the LogInActivity app view once the
          * user is done signing up.
-         */
+
 
         Intent intent = new Intent(
                     Intent.ACTION_VIEW,
                     Uri.parse(mAccountManager.getAccountCreateURL()));
 
         startActivity(intent);
-
-        //Intent intent = new Intent(LogInActivity.this, CreateAccActivity.class);
-        //startActivity(intent);
-        /*
-        Fragment fragment = new NewAccountFragment();
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.replace(R.id.content_view, fragment);
-        ft.commit();
 */
+        Intent intent = new Intent(LogInActivity.this, CreateAccActivity.class);
+        startActivity(intent);
 
 
 

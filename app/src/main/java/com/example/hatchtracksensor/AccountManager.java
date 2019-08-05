@@ -139,7 +139,7 @@ public class AccountManager {
         @Override
         public void onFailure(final Exception exception)
         {
-            Log.i("auth","Login failure");
+            Log.i("auth","Login failure: "+exception.toString());
             mAccountManagerCallback.onFailure(mPassword);
         }
     };

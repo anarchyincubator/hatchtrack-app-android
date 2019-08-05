@@ -59,6 +59,11 @@ public class PeepSensorDataFragment extends Fragment {
     private TextView mTextViewSDTemperature;
     private TextView mTextViewSDHumidity;
 
+    private TextView mTextViewTitleAverage;
+    private TextView mTextViewTitleMax;
+    private TextView mTextViewTitleMin;
+    private TextView mTextViewTitleSD;
+
     private ScrollView mSensorScrollView;
 
     private PeepUnitManager mPeepUnitManager;
@@ -128,6 +133,11 @@ public class PeepSensorDataFragment extends Fragment {
         mSettingsManager = new SettingsManager();
         PeepUnit peep = mPeepUnitManager.getPeepUnitActive();
 
+        mTextViewTitleAverage = getView().findViewById(R.id.textViewTitleAverage);
+        mTextViewTitleMax = getView().findViewById(R.id.textViewTitleMax);
+        mTextViewTitleMin = getView().findViewById(R.id.textViewTitleMin);
+        mTextViewTitleSD = getView().findViewById(R.id.textViewTitleSD);
+
         mTextViewTemperature = getView().findViewById(R.id.textViewTemperature);
         mTextViewHumidity = getView().findViewById(R.id.textViewHumidity);
 
@@ -158,16 +168,36 @@ public class PeepSensorDataFragment extends Fragment {
                 current_tab_index = tab.getPosition();
 
                 if(current_tab_index == 2){
+                    //3 day
                     current_tab_index = 7;
+                    mTextViewTitleAverage.setText("Week Average");
+                    mTextViewTitleMax.setText("Week Maxmium");
+                    mTextViewTitleMin.setText("Week Minimum");
+                    mTextViewTitleSD.setText("Avg. Deviation");
                 }
                 if(current_tab_index == 3){
+                    // all
                     current_tab_index = 999;
+                    mTextViewTitleAverage.setText("Total Average");
+                    mTextViewTitleMax.setText("Total Maxmium");
+                    mTextViewTitleMin.setText("Total Minimum");
+                    mTextViewTitleSD.setText("Avg. Deviation");
                 }
                 if(current_tab_index == 1){
+                    // week
                     current_tab_index = 3;
+                    mTextViewTitleAverage.setText("3 Day Average");
+                    mTextViewTitleMax.setText("3 Day Maxmium");
+                    mTextViewTitleMin.setText("3 Day Minimum");
+                    mTextViewTitleSD.setText("Avg. Deviation");
                 }
                 if(current_tab_index == 0){
+                    //1 day
                     current_tab_index = 1;
+                    mTextViewTitleAverage.setText("Today's Average");
+                    mTextViewTitleMax.setText("Today's Maxmium");
+                    mTextViewTitleMin.setText("Today's Minimum");
+                    mTextViewTitleSD.setText("Avg. Deviation");
                 }
 
                 startRepeatingTask();
@@ -199,7 +229,6 @@ public class PeepSensorDataFragment extends Fragment {
 
         PeepUnit peep = mPeepUnitManager.getPeepUnitActive();
 
-
         JSONObject json_obj = null;
         String val_time_start = "";
         String val_time_end = "";
@@ -215,22 +244,32 @@ public class PeepSensorDataFragment extends Fragment {
 
 
 
+        // Convert InfluxDB UTC times to the local time of the user.
+
+
+
+
         SimpleDateFormat userTimeParse = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
         Date parse_date_start = null;
         Date parse_date_end = null;
-        //userTime.setTimeZone(TimeZone.getDefault());
+       // userTimeParse.setTimeZone(TimeZone.getDefault());
+
+        TimeZone tz2 = TimeZone.getDefault();
+        System.out.println("TimeZoneID   "+tz2.getDisplayName(false, TimeZone.SHORT)+" Timezon id :: " +tz2.getID());
+
+        TimeZone timezoneID = TimeZone.getTimeZone(tz2.getDisplayName(false, TimeZone.SHORT));
+        userTimeParse.setTimeZone(timezoneID);
+
         try{
             parse_date_start = userTimeParse.parse(val_time_start);
             parse_date_end = userTimeParse.parse(val_time_end);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
-
+        Log.i("TIME PARSE",parse_date_start.toString());
 
         SimpleDateFormat hourTimeFormat = new SimpleDateFormat("M/d", Locale.ENGLISH);
-        //hourTime.setTimeZone(TimeZone.getDefault());
+        //hourTimeFormat.setTimeZone(TimeZone.getDefault());
         val_time_start = hourTimeFormat.format(parse_date_start);
         val_time_end = hourTimeFormat.format(parse_date_end);
 
@@ -265,7 +304,6 @@ public class PeepSensorDataFragment extends Fragment {
                 e.printStackTrace();
             }
         }
-
 
 
         //Log.i("sensor",json.length() + String.valueOf(mSensorAverageTemperature));
@@ -438,7 +476,8 @@ public class PeepSensorDataFragment extends Fragment {
                 //Log.i("strDate",strDate);
                 SimpleDateFormat userTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
                 Date parse_date = null;
-                //userTime.setTimeZone(TimeZone.getDefault());
+                userTime.setTimeZone(timezoneID);
+
                 try{
                     parse_date = userTime.parse(strDate);
                     //Log.i("parse_date",parse_date.toString());
@@ -571,6 +610,19 @@ public class PeepSensorDataFragment extends Fragment {
         mSensorTitleDate.setText("---");
     }
 
+    private void NATextViews(){
+        clearTable();
+        mTextViewTemperature.setText("N/A");
+        mTextViewHumidity.setText("N/A");
+        mTextViewMaximumTemperature.setText("N/A");
+        mTextViewMaximumHumidity.setText("N/A");
+        mTextViewMinimumTemperature.setText("N/A");
+        mTextViewMinimumwHumidity.setText("N/A");
+        mTextViewSDTemperature.setText("N/A");
+        mTextViewSDHumidity.setText("N/A");
+        mSensorTitleDate.setText("N/A");
+    }
+
     private class SensorUpdateJob extends AsyncTask<PeepUnit, Void, PeepUnit> {
         @Override
         protected PeepUnit doInBackground(PeepUnit... peeps) {
@@ -641,6 +693,8 @@ public class PeepSensorDataFragment extends Fragment {
                     Log.i("TIMELINE onpost: ", text + " " + fmt);
 
                     reloadSensorDataTable();
+                }else{
+                    NATextViews();
                 }
 
             }

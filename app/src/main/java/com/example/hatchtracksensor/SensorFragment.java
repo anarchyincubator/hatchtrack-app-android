@@ -20,6 +20,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import android.util.Log;
+
 public class SensorFragment extends Fragment {
 
     private final SettingsManager.TemperatureUnits CELSIUS =
@@ -37,6 +39,8 @@ public class SensorFragment extends Fragment {
     private ImageView mImageViewActiveState;
     private Button mButtonPeepSelect;
     private Button mButtonPeepConfig;
+
+    private int interval;
 
     private PeepUnitManager mPeepUnitManager;
     private SettingsManager mSettingsManager;
@@ -103,7 +107,7 @@ public class SensorFragment extends Fragment {
             mTextViewTemperatureOffset.setText(s);
         }
 
-        int interval = peep.getLastHatch().getMeasureIntervalMin();
+        interval = peep.getLastHatch().getMeasureIntervalMin();
         if (0 == (interval % 60)) {
             interval /= 60;
             String s = "Measurement Interval: " + interval + " hours";
@@ -214,6 +218,8 @@ public class SensorFragment extends Fragment {
                 String fmt = "";
 
                 long unixTime = System.currentTimeMillis() / 1000L;
+
+                /* OG inactive/active
                 if (unixTime < peep.getLastHatch().getEndUnixTimestamp()) {
                     mImageViewActiveState.setImageResource(R.drawable.ic_check_green);
                     mTextViewActiveState.setText("Active");
@@ -228,6 +234,7 @@ public class SensorFragment extends Fragment {
                             getContext(),
                             R.color.redInactive));
                 }
+                */
 
                 // Display Temperature value in the user specified units.
                 double t = peepMeasurement.getTemperature() + mTemperatureOffsetCelsius;
@@ -255,6 +262,23 @@ public class SensorFragment extends Fragment {
                 String localTime = userTime.format(date);
                 String text = "Last Updated: " + localTime;
                 mTextViewTimeUpdate.setText(text);
+
+                if (unixTime < (int)(peepMeasurement.getUnixTimestamp() + (int)(interval*60)) ) {
+                    mImageViewActiveState.setImageResource(R.drawable.ic_check_green);
+                    mTextViewActiveState.setText("Active");
+                    mTextViewActiveState.setTextColor(ContextCompat.getColor(
+                            getContext(),
+                            R.color.greenActive));
+                }
+                else {
+                    mImageViewActiveState.setImageResource(R.drawable.ic_block_red);
+                    mTextViewActiveState.setText("Inactive");
+                    mTextViewActiveState.setTextColor(ContextCompat.getColor(
+                            getContext(),
+                            R.color.redInactive));
+                }
+
+
             }
             catch (Exception e) {
                 e.printStackTrace();

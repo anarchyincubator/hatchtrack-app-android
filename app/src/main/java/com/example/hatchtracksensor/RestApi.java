@@ -25,6 +25,95 @@ public class RestApi {
 
     public static JSONArray json_array;
 
+    public static JSONObject registerUser(String email, String password, String given_name, String family_name) {
+        JSONObject userJSON = null;
+        try {
+            JSONObject json = new JSONObject();
+            json.put("email", email);
+            json.put("password", password);
+            json.put("given_name", given_name);
+            json.put("family_name", family_name);
+
+            String body = json.toString();
+            Log.i("body","body: "+body);
+            String requestURL = "https://db.hatchtrack.com:18888/register_user";
+            URL url = new URL(requestURL);
+
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+
+            OutputStream out = conn.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+            writer.write(body);
+
+            writer.flush();
+            writer.close();
+            out.close();
+
+            InputStream in = new BufferedInputStream(conn.getInputStream());
+            String data = IOUtils.toString(in);
+            json = new JSONObject(data);
+            userJSON = json;
+            //userJSON = json.getString("new_user");
+            Log.i("registerUser","register");
+            Log.i("registerUser",userJSON.toString());
+        } catch (Exception e) {
+            Log.i("failedRegiser","failedRegiser");
+
+            e.printStackTrace();
+        }
+
+        return userJSON;
+    }
+
+    public static JSONObject verifyUser(String email, String confirm_code) {
+        JSONObject userJSON = null;
+        try {
+            JSONObject json = new JSONObject();
+            json.put("email", email);
+            json.put("confirm_code", confirm_code);
+
+            String body = json.toString();
+            Log.i("body","body: "+body);
+            String requestURL = "https://db.hatchtrack.com:18888/register_confirm";
+            URL url = new URL(requestURL);
+
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+
+            OutputStream out = conn.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+            writer.write(body);
+
+            writer.flush();
+            writer.close();
+            out.close();
+
+            InputStream in = new BufferedInputStream(conn.getInputStream());
+            String data = IOUtils.toString(in);
+            json = new JSONObject(data);
+            userJSON = json;
+            //userJSON = json.getString("new_user");
+            Log.i("register_confirm",userJSON.toString());
+        } catch (Exception e) {
+            Log.i("failedRegiser","failedRegiser");
+
+            e.printStackTrace();
+        }
+
+        return userJSON;
+    }
+
     public static String postUserAuth(String email, String password) {
         String accessToken = "";
         try {

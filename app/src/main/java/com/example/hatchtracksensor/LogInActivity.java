@@ -1,8 +1,7 @@
 package com.example.hatchtracksensor;
 
-import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.ProgressBar;
+import android.util.Log;
 
 
 public class LogInActivity extends AppCompatActivity {
@@ -20,6 +20,8 @@ public class LogInActivity extends AppCompatActivity {
     private TextView mTextViewStatus;
     private EditText mEditTextEmail;
     private EditText mEditTextPassword;
+
+    private static SharedPreferences mSharedPreferences;
 
     private ProgressBar mProgressBar;
 
@@ -34,13 +36,21 @@ public class LogInActivity extends AppCompatActivity {
         setContentView(R.layout.activity_log_in);
 
         mButtonSignIn = findViewById(R.id.buttonSignIn);
-        mButtonCreateAccount = findViewById(R.id.buttonCreateAccount);
+        mButtonCreateAccount = findViewById(R.id.buttonConfirmAccount);
         mTextViewStatus = findViewById(R.id.textViewStatus);
         mEditTextEmail = findViewById(R.id.editTextEmail);
         mEditTextPassword = findViewById(R.id.editTextPassword);
 
         mProgressBar = findViewById(R.id.progressBarLogin);
         mProgressBar.setVisibility(View.GONE);
+
+        mSharedPreferences = getApplicationContext().getSharedPreferences(
+                "UserData",
+                getApplicationContext().MODE_PRIVATE);
+
+       // mSharedPreferences.edit().clear().commit();
+        
+
 
         /*
          * We have an Intent with non-null data if we're returning from account registration
@@ -61,6 +71,10 @@ public class LogInActivity extends AppCompatActivity {
         // Grab the cached Email and Password.
         mAccountManager = new AccountManager(getApplicationContext());
         mEmail = mAccountManager.getEmail();
+        if(getIntent().getStringExtra("mEmail")!=null){
+            mEmail = getIntent().getStringExtra("mEmail");
+        }
+
         mPassword = mAccountManager.getPassword();
         mEditTextEmail.setText(mEmail);
         mEditTextPassword.setText(mPassword);
@@ -93,7 +107,28 @@ public class LogInActivity extends AppCompatActivity {
             @Override
             public void onFailure(String response) {
                 mProgressBar.setVisibility(View.GONE);
-                mTextViewStatus.setText("Invalid Email or Password");
+
+                Log.i("onFailureon",response);
+
+
+                if(response.contains("User does not exist")){
+                    mTextViewStatus.setText("User does not exist");
+                }else if(response.contains("Failed to authenticate user")){
+                    //Unconfirmed user account, go to enter confirm code:
+                    Intent intent = new Intent(LogInActivity.this, ConfirmAccActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    intent.putExtra("mEmail", mEmail);
+                    startActivity(intent);
+                    //mTextViewStatus.setText("Failed to authenticate user");
+                }else{
+                    mTextViewStatus.setText("Invalid Email or Password");
+                }
+
+
+
+
+
+
                 mTextViewStatus.setVisibility(View.VISIBLE);
 
                 mButtonSignIn.setEnabled(true);

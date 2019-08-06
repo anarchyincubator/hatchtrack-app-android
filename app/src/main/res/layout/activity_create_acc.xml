@@ -29,7 +29,7 @@
         app:layout_constraintGuide_percent="0.5" />
 
     <EditText
-        android:id="@+id/editTextName"
+        android:id="@+id/editmConfirmCode"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
@@ -59,7 +59,7 @@
         android:inputType="textEmailAddress"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextName" />
+        app:layout_constraintTop_toBottomOf="@+id/editmConfirmCode" />
 
     <EditText
         android:id="@+id/editTextPassword"
@@ -99,11 +99,11 @@
         android:autofillHints="email"
         android:text="@string/text_view_email_new"
         android:visibility="visible"
-        app:layout_constraintBottom_toTopOf="@+id/editTextName"
-        app:layout_constraintStart_toStartOf="@+id/editTextName" />
+        app:layout_constraintBottom_toTopOf="@+id/editmConfirmCode"
+        app:layout_constraintStart_toStartOf="@+id/editmConfirmCode" />
 
     <Button
-        android:id="@+id/buttonCreateAccount"
+        android:id="@+id/buttonConfirmAccount"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
@@ -127,7 +127,7 @@
         android:layout_marginTop="32dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="90dp"
-        app:layout_constraintBottom_toTopOf="@+id/editTextName"
+        app:layout_constraintBottom_toTopOf="@+id/editmConfirmCode"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"

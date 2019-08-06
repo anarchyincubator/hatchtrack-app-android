@@ -5,7 +5,7 @@
     android:id="@+id/NewAccountFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".NewAccountFragment">
+    tools:context=".ConfirmAccActivity">
 
     <ProgressBar
         android:id="@+id/progressBarLogin"
@@ -37,57 +37,14 @@
         android:layout_marginBottom="32dp"
         android:autoText="false"
         android:ems="10"
-        android:hint="@string/edit_text_name_default"
+        android:hint="@string/edit_text_confirm"
         android:inputType="textAutoComplete"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <EditText
-        android:id="@+id/editTextEmail"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="32dp"
-        android:autoText="false"
-        android:ems="10"
-        android:hint="@string/edit_text_email_default"
-        android:inputType="textEmailAddress"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editmConfirmCode" />
-
-    <EditText
-        android:id="@+id/editTextPassword"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="32dp"
-        android:autofillHints="password"
-        android:ems="10"
-        android:hint="@string/edit_text_password_default"
-        android:inputType="textPassword"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextEmail" />
-
-    <EditText
-        android:id="@+id/editTextPasswordAgain"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="32dp"
-        android:autofillHints="password again"
-        android:ems="10"
-        android:hint="@string/edit_text_password_again"
-        android:inputType="textPassword"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextPassword" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.475" />
 
     <TextView
         android:id="@+id/textViewEmail"
@@ -95,7 +52,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:autofillHints="email"
-        android:text="@string/text_view_email"
+        android:text="@string/text_view_confirm_title"
         android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@+id/editmConfirmCode"
         app:layout_constraintStart_toStartOf="@+id/editmConfirmCode" />
@@ -109,13 +66,30 @@
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="16dp"
         android:background="@drawable/button_rounded_corners"
-        android:text="@string/button_create_account"
+        android:text="@string/button_confirm_account"
         android:textColor="#FFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextPasswordAgain" />
+        app:layout_constraintTop_toBottomOf="@+id/editmConfirmCode" />
+
+    <Button
+        android:id="@+id/buttonRequestCode"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/button_rounded_corners"
+        android:text="@string/button_confirm_request"
+        android:textColor="#FFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonConfirmAccount" />
 
     <ImageView
         android:id="@+id/imageViewLogo"
@@ -124,7 +98,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="32dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="84dp"
+        android:layout_marginBottom="90dp"
         app:layout_constraintBottom_toTopOf="@+id/editmConfirmCode"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

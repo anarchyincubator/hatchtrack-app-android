@@ -10,6 +10,7 @@ import android.app.Fragment;
 import android.os.Handler;
 import android.support.design.widget.TabLayout;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +19,7 @@ import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -66,6 +68,8 @@ public class PeepSensorDataFragment extends Fragment {
 
     private ScrollView mSensorScrollView;
 
+    private AccountManager mAccountManager;
+
     private PeepUnitManager mPeepUnitManager;
     private SettingsManager mSettingsManager;
 
@@ -87,9 +91,16 @@ public class PeepSensorDataFragment extends Fragment {
     private double mSensorMaximumHumidity;
     private double mSensorSDHumidity;
 
-    public String current_hatch_uuid;
+    private PeepUnit peep;
 
-    public ArrayList<String> hatchList;
+    private String[] mHatchUUIDArray;
+    private String[] mHatchStartEndArray;
+    public ArrayList<PeepHatch> peepHatches;
+
+    public String current_hatch_uuid;
+    public int currentHatchUUIDIndex;
+
+    public ArrayList<String> hatchUUIDList;
 
     // Poll the database for new data at the provided time interval.
     private final static int mDbPollInterval = 1000 * 60 * 1; // 1 minute
@@ -98,7 +109,7 @@ public class PeepSensorDataFragment extends Fragment {
     private Runnable mHandlerTask = new Runnable() {
         @Override
         public void run() {
-            PeepUnit peep = mPeepUnitManager.getPeepUnitActive();
+            peep = mPeepUnitManager.getPeepUnitActive();
             Log.i("TIMELINE Runnable:","mHandlerTask");
 
             PeepSensorDataFragment.SensorUpdateJob sensorUpdateJob = new PeepSensorDataFragment.SensorUpdateJob();
@@ -131,7 +142,9 @@ public class PeepSensorDataFragment extends Fragment {
         Log.i("TIMELINE SENSOR_DATA:","onActivityCreated");
         mPeepUnitManager = new PeepUnitManager();
         mSettingsManager = new SettingsManager();
-        PeepUnit peep = mPeepUnitManager.getPeepUnitActive();
+        //PeepUnit peep = mPeepUnitManager.getPeepUnitActive();
+
+        peepHatches = new ArrayList<PeepHatch>();
 
         mTextViewTitleAverage = getView().findViewById(R.id.textViewTitleAverage);
         mTextViewTitleMax = getView().findViewById(R.id.textViewTitleMax);
@@ -218,9 +231,11 @@ public class PeepSensorDataFragment extends Fragment {
         mImageViewHistory.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                buildHatchHistoryList();
+                getHatchHistoryData();
             }
         });
+
+        mAccountManager = new AccountManager(getContext());
 
         startRepeatingTask();
     }
@@ -646,8 +661,8 @@ public class PeepSensorDataFragment extends Fragment {
 
             //peep.setMeasurement(peepMeasurement);
 
-            hatchList = RestApi.getHatchUUIDs(accessToken, peep);
-            Collections.reverse(hatchList);
+            hatchUUIDList = RestApi.getHatchUUIDs(accessToken, peep);
+            Collections.reverse(hatchUUIDList);
             return peep;
         }
 
@@ -703,14 +718,48 @@ public class PeepSensorDataFragment extends Fragment {
             }
         }
     }
-    public void buildHatchHistoryList(){
+    public void buildHatchHistoryList(JSONObject peepHatchAllData){
+        mHatchStartEndArray = new String[hatchUUIDList.size()];
+        JSONArray json = new JSONArray();
+        try {
+            json = peepHatchAllData.getJSONArray("hatches_all_data");
+            Log.i("json", json.toString());
+        }catch(Exception e){
 
-        String[] mStringArray = new String[hatchList.size()];
-        mStringArray = hatchList.toArray(mStringArray);
+        }
+        for(int i=0;i<json.length();i++){
 
-        final String[] action = mStringArray;
-        //final int peepSelect = position;
-        //final float length = (float)action.length-1;
+            JSONObject current = new JSONObject();
+            Date dateStart = new java.util.Date();
+            Date dateEnd = new java.util.Date();
+            Date dateCurr = new java.util.Date();
+            try{
+                current = json.getJSONObject(i);
+                Log.i("current",current.toString());
+                dateStart = new java.util.Date(current.getInt("start_unix_timestamp")*1000L);
+                dateEnd = new java.util.Date(current.getInt("end_unix_timestamp")*1000L);
+            }catch(Exception e){
+
+            }
+            SimpleDateFormat hourTime = new SimpleDateFormat("M/d/Y", Locale.ENGLISH);
+            String localTimeStart = hourTime.format(dateStart);
+            String localTimeEnd = hourTime.format(dateEnd);
+            if(dateEnd.compareTo(dateCurr)>0)localTimeEnd = "Current";
+            String startEnd = localTimeStart + " - " + localTimeEnd;
+            mHatchStartEndArray[i] = startEnd;
+        }
+
+        //first create a list from String array
+        List<String> list = Arrays.asList(mHatchStartEndArray);
+
+        //next, reverse the list using Collections.reverse method
+        Collections.reverse(list);
+
+        //next, convert the list back to String array
+
+        final String[] action = (String[])list.toArray();
+        //peepHatches
+
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("Hatch Data");
         builder.setItems(action, new DialogInterface.OnClickListener() {
@@ -719,7 +768,7 @@ public class PeepSensorDataFragment extends Fragment {
             public void onClick(DialogInterface dialog, int which) {
                 Log.i("BUILDER", String.valueOf(which));
 
-                current_hatch_uuid = hatchList.get(which);
+                current_hatch_uuid = hatchUUIDList.get(which);
                 if(String.valueOf(which).equals("0"))current_hatch_uuid = "";
                 Log.i("current_hatch_uuid",current_hatch_uuid);
                 resetAvgTextViews();
@@ -741,6 +790,11 @@ public class PeepSensorDataFragment extends Fragment {
             }
         });
         builder.show();
+    }
+    public void getHatchHistoryData(){
+        mHatchUUIDArray = new String[hatchUUIDList.size()];
+        mHatchUUIDArray = hatchUUIDList.toArray(mHatchUUIDArray);
+        getHatchDataEnum();
     }
 
     public void disabledTabs(){
@@ -764,7 +818,60 @@ public class PeepSensorDataFragment extends Fragment {
         }
     }
 
-    public void popupHistorySelector(){
-
+    public void getHatchDataEnum(){
+        Log.i("HATCH_DATA", "getHatchDataEnum");
+        PeepSensorDataFragment.enumFunction job = new PeepSensorDataFragment.enumFunction();
+        job.execute();
     }
+    private class enumFunction extends AsyncTask<PeepHatch, Void, JSONObject > {
+
+        JSONObject peepHatchAllData = new JSONObject();
+        @Override
+        protected JSONObject doInBackground(PeepHatch... pairs) {
+            Log.i("HATCH_DATA", "doInBackground");
+            String accessToken = RestApi.postUserAuth( peep.getUserEmail(), peep.getUserPassword());
+            peepHatchAllData = RestApi.getAllHatchData(accessToken, peep.getUUID());
+            Log.i("HATCH_DATA", peepHatchAllData.toString());
+            return peepHatchAllData;
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject returnedData) {
+            buildHatchHistoryList(returnedData);
+        }
+    }
+    /*
+    private class enumFunction extends AsyncTask<PeepHatch, Void, PeepHatch > {
+
+        @Override
+        protected PeepHatch doInBackground(PeepHatch... pairs) {
+            Log.i("HATCH_DATA", "doInBackground");
+            String accessToken = RestApi.postUserAuth( peep.getUserEmail(), peep.getUserPassword());
+            PeepHatch peepHatch = RestApi.getHatch(accessToken, mHatchUUIDArray[currentHatchUUIDIndex]);
+
+            return peepHatch;
+        }
+
+        @Override
+        protected void onPostExecute(PeepHatch currentHatch) {
+            //long startUnixTimestamp = currentHatch.getStartUnixTimestamp();
+            //long endUnixTimestamp = currentHatch.getEndUnixTimestamp();
+            //Log.i("HATCH_DATA", "onPostExecute: peepHatch: "+ currentHatch.getStartUnixTimestamp());
+
+            peepHatches.add(currentHatch);
+
+            //Log.i("HATCH_DATA", String.valueOf(peepHatches.get(0).getStartUnixTimestamp()));
+
+            if(currentHatchUUIDIndex < mHatchUUIDArray.length-1){
+                //Log.i("HATCH_DATA", String.valueOf(currentHatchUUIDIndex));
+                currentHatchUUIDIndex++;
+                getHatchDataEnum();
+            }else{
+                Log.i("HATCH_DATA", peepHatches.toString());
+                buildHatchHistoryList();
+            }
+
+        }
+    }
+    */
 }

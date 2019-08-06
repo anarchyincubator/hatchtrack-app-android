@@ -7,6 +7,10 @@
     <string name="text_view_password">Password</string>
     <string name="text_view_email">Account</string>
     <string name="text_view_email_new">New Account</string>
+    <string name="text_view_confirm_title">Enter the 6-digit confirmation code sent to your email.</string>
+    <string name="edit_text_confirm">Confirmation Code</string>
+    <string name="button_confirm_account">Confirm Account</string>
+    <string name="button_confirm_request">Request New Confirm Code</string>
     <string name="button_sign_in">Sign In</string>
     <string name="text_view_status"></string>
     <string name="button_forgot_password">Forgot password?</string>

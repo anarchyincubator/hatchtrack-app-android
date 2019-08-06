@@ -1,7 +1,10 @@
 package com.example.hatchtracksensor;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.util.Log;
+import android.view.View;
 
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoDevice;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
@@ -139,8 +142,12 @@ public class AccountManager {
         @Override
         public void onFailure(final Exception exception)
         {
+            String exc = exception.toString();
             Log.i("auth","Login failure: "+exception.toString());
-            mAccountManagerCallback.onFailure(mPassword);
+            mAccountManagerCallback.onFailure(exc);
+
+
+
         }
     };
 }

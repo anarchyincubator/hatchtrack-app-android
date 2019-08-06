@@ -60,7 +60,6 @@ public class RestApi {
             json = new JSONObject(data);
             userJSON = json;
             //userJSON = json.getString("new_user");
-            Log.i("registerUser","register");
             Log.i("registerUser",userJSON.toString());
         } catch (Exception e) {
             Log.i("failedRegiser","failedRegiser");
@@ -71,7 +70,7 @@ public class RestApi {
         return userJSON;
     }
 
-    public static JSONObject verifyUser(String email, String confirm_code) {
+    public static JSONObject confirmUser(String email, String confirm_code) {
         JSONObject userJSON = null;
         try {
             JSONObject json = new JSONObject();
@@ -354,6 +353,33 @@ public class RestApi {
 
         try {
             String reqURL = "https://db.hatchtrack.com:18888/api/v1/user/push_notification_settings";
+            URL url = new URL(reqURL);
+
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty(HEADER_ACCESS_TOKEN, accessToken);
+            conn.setDoInput(true);
+
+            InputStream in = new BufferedInputStream(conn.getInputStream());
+            String data = IOUtils.toString(in);
+            json = new JSONObject(data);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return json;
+    }
+
+
+
+    public static JSONObject getAllHatchData(String accessToken, String peepUUID) {
+        JSONObject json = new JSONObject();
+
+        try {
+            String reqURL = "https://db.hatchtrack.com:18888/api/v1/peep/hatches_all_data?peepUUID=" + peepUUID;
             URL url = new URL(reqURL);
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();

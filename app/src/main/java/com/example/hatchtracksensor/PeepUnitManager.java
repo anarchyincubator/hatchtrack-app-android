@@ -1,10 +1,15 @@
 package com.example.hatchtracksensor;
 
+import android.util.Log;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 public class PeepUnitManager {
 
-    private static ArrayList<PeepUnit> mPeepList = new ArrayList<PeepUnit>();
+    public static ArrayList<PeepUnit> mPeepList = new ArrayList<PeepUnit>();
     private static int mActivePeepIndex = 0;
 
     public PeepUnitManager() {
@@ -33,6 +38,36 @@ public class PeepUnitManager {
         return names;
     }
 
+    public String[] getPeepHatches() {
+        String hatches[] = new String[mPeepList.size()];
+        PeepUnit unit;
+
+        for (int i = 0; i < mPeepList.size(); i++) {
+            unit = mPeepList.get(i);
+
+            Date dateStart = new java.util.Date();
+            Date dateEnd = new java.util.Date();
+            Date dateCurr = new java.util.Date();
+            try{
+                //current = json.getJSONObject(i);
+                //Log.i("current",current.toString());
+                dateStart = new java.util.Date(unit.getLastHatch().getStartUnixTimestamp()*1000L);
+                dateEnd = new java.util.Date(unit.getLastHatch().getEndUnixTimestamp()*1000L);
+            }catch(Exception e){
+
+            }
+            SimpleDateFormat hourTime = new SimpleDateFormat("M/d", Locale.ENGLISH);
+            String localTimeStart = hourTime.format(dateStart);
+            String localTimeEnd = hourTime.format(dateEnd);
+            if(dateEnd.compareTo(dateCurr)>0)localTimeEnd = "In Progress";
+            String startEnd = localTimeStart + " - " + localTimeEnd;
+
+            hatches[i] = startEnd;
+        }
+
+        return hatches;
+    }
+
     public void addPeepUnit(PeepUnit peepUnit) {
         mPeepList.add(0, peepUnit);
     }
@@ -45,8 +80,9 @@ public class PeepUnitManager {
             return null;
         }
     }
-
-    public PeepUnit[] getPeepUnits() {
+//PeepUnit[]
+    public ArrayList<PeepUnit> getPeepUnits() {
+        /*
         PeepUnit units[] = new PeepUnit[mPeepList.size()];
         PeepUnit unit;
 
@@ -57,6 +93,8 @@ public class PeepUnitManager {
         }
 
         return units;
+        */
+        return mPeepList;
     }
 
     public int getPeepUnitCount() {
@@ -64,6 +102,7 @@ public class PeepUnitManager {
     }
 
     public void setPeepUnitActive(int i) {
+        Log.i("setPeepUnitActive","setPeepUnitActive "+i);
         if ((i >= 0) && (i < mPeepList.size())) {
             mActivePeepIndex = i;
         }
@@ -71,6 +110,7 @@ public class PeepUnitManager {
 
     public PeepUnit getPeepUnitActive() {
         PeepUnit unit = mPeepList.get(mActivePeepIndex);
+        Log.i("GETPeepUnitActive","GETPeepUnitActive "+unit.getUUID());
         return unit;
     }
 }

@@ -80,26 +80,48 @@
         android:onClick="onClickButtonSignIn"
         android:text="@string/button_sign_in"
         android:textColor="#FFFFFF"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextPassword" />
 
     <Button
-        android:id="@+id/buttonConfirmAccount"
+        android:id="@+id/buttonCreateAccount"
+        style="?android:attr/borderlessButtonStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="16dp"
-        android:background="@drawable/button_rounded_corners"
         android:onClick="onClickButtonCreateAccount"
         android:text="@string/button_create_account"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/colorPrimary"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonSignIn"
+        app:layout_constraintVertical_bias="0.125" />
+
+    <Button
+        android:id="@+id/buttonForgotPassword"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="0dp"
+        android:onClick="onClickButtonForgotPassword"
+        android:text="@string/button_forgot_password"
+        android:textColor="#3486f7"
+        android:textSize="13sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonSignIn" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonCreateAccount" />
 
     <ImageView
         android:id="@+id/imageViewLogo"

@@ -124,6 +124,8 @@ public class RestApi {
             String requestURL = "https://db.hatchtrack.com:18888/auth";
             URL url = new URL(requestURL);
 
+            Log.i("postUserAuth",body);
+
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setReadTimeout(15000);
             conn.setConnectTimeout(15000);
@@ -144,6 +146,7 @@ public class RestApi {
             String data = IOUtils.toString(in);
             json = new JSONObject(data);
             accessToken = json.getString("accessToken");
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -290,6 +293,50 @@ public class RestApi {
         return status;
     }
 
+    public static boolean postNotificationToken(String accessToken, String token, String platform, String email) {
+        boolean status = true;
+
+        try {
+            JSONObject json = new JSONObject();
+            json.put("push_notif_token", token.replace("\n", ""));
+            json.put("platform", platform.replace("\n", ""));
+            json.put("email", email.replace("\n", ""));
+            String body = json.toString();
+
+            Log.i("postNotificationToken", body);
+
+            String requestURL = "https://db.hatchtrack.com:18888/api/v1/user/notification_token_platform";
+            URL url = new URL(requestURL);
+
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty(HEADER_ACCESS_TOKEN, accessToken);
+            conn.setDoOutput(true);
+
+            OutputStream out = conn.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+            writer.write(body);
+
+            writer.flush();
+            writer.close();
+            out.close();
+
+            int code = conn.getResponseCode();
+            if (200 == code) {
+                status = true;
+            } else {
+                status = false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return status;
+    }
+
     public static ArrayList<String> getPeepUUIDs(String accessToken) {
         ArrayList<String> list = new ArrayList<String>();
         try {
@@ -365,6 +412,7 @@ public class RestApi {
             InputStream in = new BufferedInputStream(conn.getInputStream());
             String data = IOUtils.toString(in);
             json = new JSONObject(data);
+            Log.i("NotificationSettings",json.toString());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -381,6 +429,33 @@ public class RestApi {
         try {
             String reqURL = "https://db.hatchtrack.com:18888/api/v1/peep/hatches_all_data?peepUUID=" + peepUUID;
             URL url = new URL(reqURL);
+
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty(HEADER_ACCESS_TOKEN, accessToken);
+            conn.setDoInput(true);
+            Log.i("getAllHatchData",accessToken + " ---- " + reqURL);
+            InputStream in = new BufferedInputStream(conn.getInputStream());
+            String data = IOUtils.toString(in);
+            json = new JSONObject(data);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return json;
+    }
+
+    public static JSONObject getAllHatchDataEmail(String accessToken, String email) {
+        JSONObject json = new JSONObject();
+
+        try {
+            String reqURL = "https://db.hatchtrack.com:18888/api/v1/peep/hatches_all_data_email?email=" + email;
+            URL url = new URL(reqURL);
+
+            Log.i("getAllHatchDataEmail",reqURL);
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setReadTimeout(15000);
@@ -422,6 +497,12 @@ public class RestApi {
             peepHatch.setEndUnixTimestamp(json.getLong("endUnixTimestamp"));
             peepHatch.setMeasureIntervalMin(json.getInt("measureIntervalMin"));
             peepHatch.setTemperatureOffsetCelsius((float) json.getDouble("temperatureOffsetCelsius"));
+            peepHatch.setSpeciesUUID(json.getString("speciesUUID"));
+            if( !json.isNull("eggCount"))peepHatch.setEggCount(json.getInt("eggCount"));
+            peepHatch.setHatchName(json.getString("hatchName"));
+            peepHatch.setHatchNotes(json.getString("notes"));
+            if( !json.isNull("hatchedCount"))peepHatch.setHatchedCount(json.getInt("hatchedCount"));
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -435,9 +516,96 @@ public class RestApi {
         try {
             JSONObject json = new JSONObject();
             json.put("hatchUUID", peepHatch.getUUID().replace("\n", ""));
+            json.put("hatchedCount", peepHatch.getHatchedCount());
             String body = json.toString();
 
             String requestURL = "https://db.hatchtrack.com:18888/api/v1/hatch/end";
+            URL url = new URL(requestURL);
+
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty(HEADER_ACCESS_TOKEN, accessToken);
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+
+            OutputStream out = conn.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+            writer.write(body);
+
+            writer.flush();
+            writer.close();
+            out.close();
+
+            int code = conn.getResponseCode();
+            if (200 == code) {
+                status = true;
+            } else {
+                status = false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            status = false;
+        }
+
+        return status;
+    }
+
+    public static boolean postHatchNotes(String accessToken, PeepHatch peepHatch) {
+        boolean status = false;
+        Log.i("postHatchNotes","postHatchNotes");
+        try {
+            JSONObject json = new JSONObject();
+            json.put("hatchUUID", peepHatch.getUUID().replace("\n", ""));
+            json.put("hatchNotes", peepHatch.getHatchNotes());
+            String body = json.toString();
+            Log.i("postHatchNotes", body);
+            String requestURL = "https://db.hatchtrack.com:18888/api/v1/hatch/notes";
+            URL url = new URL(requestURL);
+
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty(HEADER_ACCESS_TOKEN, accessToken);
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+
+            OutputStream out = conn.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+            writer.write(body);
+
+            writer.flush();
+            writer.close();
+            out.close();
+
+            int code = conn.getResponseCode();
+            if (200 == code) {
+                status = true;
+            } else {
+                status = false;
+            }
+        } catch (Exception e) {
+            Log.i("e",e.toString());
+            e.printStackTrace();
+            status = false;
+        }
+
+        return status;
+    }
+
+    public static boolean resumeHatch(String accessToken, PeepHatch peepHatch) {
+        boolean status = false;
+
+        try {
+            JSONObject json = new JSONObject();
+            json.put("hatchUUID", peepHatch.getUUID().replace("\n", ""));
+            String body = json.toString();
+
+            String requestURL = "https://db.hatchtrack.com:18888/api/v1/hatch/resume";
             URL url = new URL(requestURL);
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -479,12 +647,20 @@ public class RestApi {
             long endUnixTimestamp = peepHatch.getEndUnixTimestamp();
             int measureIntervalMin = peepHatch.getMeasureIntervalMin();
             float temperatureOffsetCelsius = peepHatch.getTemperatureOffsetCelsius();
+            String speciesUUID = peepHatch.getSpeciesUUID();
+            int eggCount = peepHatch.getEggCount();
+            String hatchName = peepHatch.getHatchName();
 
             JSONObject json = new JSONObject();
             json.put("peepUUID", peepUUID.replace("\n", ""));
             json.put("endUnixTimestamp", endUnixTimestamp);
             json.put("measureIntervalMin", measureIntervalMin);
             json.put("temperatureOffsetCelsius", temperatureOffsetCelsius);
+            json.put("temperatureOffsetCelsius", temperatureOffsetCelsius);
+            json.put("temperatureOffsetCelsius", temperatureOffsetCelsius);
+            json.put("speciesUUID", speciesUUID);
+            json.put("eggCount", eggCount);
+            json.put("hatchName", hatchName);
             String body = json.toString();
 
             Log.i("postNewPeepHatch JSON: ", body);
@@ -532,13 +708,21 @@ public class RestApi {
             long endUnixTimestamp = peepHatch.getEndUnixTimestamp();
             int measureIntervalMin = peepHatch.getMeasureIntervalMin();
             float temperatureOffsetCelsius = peepHatch.getTemperatureOffsetCelsius();
+            String speciesUUID = peepHatch.getSpeciesUUID();
+            int eggCount = peepHatch.getEggCount();
+            String hatchName = peepHatch.getHatchName();
 
             JSONObject json = new JSONObject();
             json.put("hatchUUID", hatchUUID);
             json.put("endUnixTimestamp", endUnixTimestamp);
-            json.put("measureIntervalMin", measureIntervalMin);
+            //json.put("measureIntervalMin", measureIntervalMin);
             json.put("temperatureOffsetCelsius", temperatureOffsetCelsius);
+            json.put("speciesUUID", speciesUUID);
+            json.put("eggCount", eggCount);
+            json.put("hatchName", hatchName);
             String body = json.toString();
+
+            Log.i("HATCH","body: "+body);
 
             String requestURL = "https://db.hatchtrack.com:18888/api/v1/hatch/reconfig";
             URL url = new URL(requestURL);
@@ -615,7 +799,7 @@ public class RestApi {
 
         Log.i("TIMELINE 0:","gethatchUUIDTimeline: "+hatchUUID);
         int last = 0;
-        if(hatchUUID.equals("")) {
+        if(hatchUUID.equals("") && peepUnit!=null) {
             ArrayList<String> hatchUUIDs = RestApi.getHatchUUIDs(accessToken, peepUnit);
             if (0 < hatchUUIDs.size()) {
                 last = hatchUUIDs.size() - 1;

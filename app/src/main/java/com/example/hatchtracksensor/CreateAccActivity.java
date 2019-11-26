@@ -140,23 +140,27 @@ public class CreateAccActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(JSONObject result) {
             mProgressBar.setVisibility(View.GONE);
-            String exc = result.toString();
-            Log.i("onPostExecute",result.toString());
-            try {
-                //mEditTextEmail.setText(result.getString("message"));
-                if(exc.contains("userPoolId")){
-                    //Unconfirmed user account, go to enter confirm code:
-                    Intent intent = new Intent(CreateAccActivity.this, ConfirmAccActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    intent.putExtra("mEmail", mEmail);
-                    startActivity(intent);
-                }else if(exc.contains("UsernameExistsException")){
-                    mEditTextEmail.setText("An account with the given email already exists.");
-                }else{
-                    mEditTextEmail.setText("Failed to create account.");
+            if(result != null) {
+                String exc = result.toString();
+                Log.i("onPostExecute", result.toString());
+                try {
+                    //mEditTextEmail.setText(result.getString("message"));
+                    if (exc.contains("userPoolId")) {
+                        //Unconfirmed user account, go to enter confirm code:
+                        Intent intent = new Intent(CreateAccActivity.this, ConfirmAccActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        intent.putExtra("mEmail", mEmail);
+                        startActivity(intent);
+                    } else if (exc.contains("UsernameExistsException")) {
+                        mEditTextEmail.setText("An account with the given email already exists.");
+                    } else {
+                        mEditTextEmail.setText("Failed to create account.");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+            }else{
+                Log.i("onPostExecute FAIL", " - ");
             }
         }
             // execution of result of Long time consuming operation

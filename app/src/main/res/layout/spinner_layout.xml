@@ -4,6 +4,8 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:textColor="@color/colorPrimary"
+    android:background="@color/lightGrey"
+
     android:textSize="18sp"
     android:gravity="center"
     />

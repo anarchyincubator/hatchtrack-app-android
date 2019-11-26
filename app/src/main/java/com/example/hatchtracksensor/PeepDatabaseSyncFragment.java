@@ -99,7 +99,8 @@ public class PeepDatabaseSyncFragment extends Fragment {
                 PeepUnitManager peepUnitManager = new PeepUnitManager();
                 peepUnitManager.setPeepUnits(peepUnits);
 
-                Fragment fragment = new SensorFragment();
+                //Fragment fragment = new SensorFragment();
+                Fragment fragment = new HatchSelectFragment();
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
                 ft.replace(R.id.content_view, fragment);
                 ft.commit();

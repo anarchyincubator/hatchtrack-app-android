@@ -13,7 +13,7 @@
     <string name="button_confirm_request">Request New Confirm Code</string>
     <string name="button_sign_in">Sign In</string>
     <string name="text_view_status"></string>
-    <string name="button_forgot_password">Forgot password?</string>
+    <string name="button_forgot_password">Reset Password</string>
     <string name="button_create_account">Create Account</string>
     <string name="title_activity_main">Hatchtrack Sensor</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -46,11 +46,12 @@
     <string name="edit_text_wifi_ssid">SSID</string>
     <string name="text_view_ble_config_wifi_title">WiFi Credentials</string>
     <string name="text_view_ble_wifi_config_status">Scan for Peep...</string>
-    <string name="text_view_hatch_config_status">Configure Peep...</string>
-    <string name="text_view_hatch_config_name_title">Name</string>
+    <string name="text_view_hatch_config_status">Configure</string>
+    <string name="text_view_hatch_config_name_title">Hatch Name</string>
     <string name="text_view_hatch_config_duration_title">Measure Interval</string>
+    <string name="text_view_hatch_config_egg_count_title"># of Eggs</string>
     <string name="text_view_measure_duration_units">minutes</string>
-    <string name="button_hatch_configure">Configure</string>
+    <string name="button_hatch_configure">Save</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

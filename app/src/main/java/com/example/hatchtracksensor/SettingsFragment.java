@@ -2,6 +2,7 @@ package com.example.hatchtracksensor;
 
 import android.app.FragmentTransaction;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
@@ -24,6 +25,7 @@ import org.json.JSONObject;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
@@ -58,7 +60,13 @@ public class SettingsFragment extends Fragment {
         @Override
         public void run() {
             mPeepUnitManager = new PeepUnitManager();
-            PeepUnit peep = mPeepUnitManager.getPeepUnitActive();
+            PeepUnit peep = new PeepUnit();
+
+
+            if(mPeepUnitManager.mPeepList.size()>0) {
+                peep = mPeepUnitManager.getPeepUnitActive();
+            }
+
             Log.i("TIMELINE Runnable:","mHandlerTask");
 
             SettingsFragment.SensorUpdateJob sensorUpdateJob = new SettingsFragment.SensorUpdateJob();
@@ -204,7 +212,14 @@ public class SettingsFragment extends Fragment {
         });
 
         mPeepUnitManager = new PeepUnitManager();
-        PeepUnit peep = mPeepUnitManager.getPeepUnitActive();
+
+        PeepUnit peep = new PeepUnit();
+
+
+        if(mPeepUnitManager.mPeepList.size()>0) {
+            peep = mPeepUnitManager.getPeepUnitActive();
+        }
+
 
         SettingsFragment.GetNotificationSettings job = new SettingsFragment.GetNotificationSettings();
         job.execute(peep);
@@ -227,7 +242,11 @@ public class SettingsFragment extends Fragment {
 
             PeepUnit peep = peeps[0];
 
-            String accessToken = RestApi.postUserAuth(mAccountManager.getEmail(), mAccountManager.getPassword());
+            SharedPreferences preferences = getContext().getSharedPreferences("UserData", getContext().getApplicationContext().MODE_PRIVATE);
+            String email = preferences.getString("email", null);
+            String password = preferences.getString("password", null);
+
+            String accessToken = RestApi.postUserAuth(email, password);
             RestApi.postToggleSwitch(accessToken,mSwitchTempTooHot.isChecked(),mSwitchTempTooCold.isChecked(),mSwitchHumidityOver.isChecked(),mSwitchHumidityUnder.isChecked());
 
 

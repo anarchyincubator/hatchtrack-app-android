@@ -2,6 +2,7 @@ package com.example.hatchtracksensor;
 
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -29,6 +30,9 @@ public class SensorFragment extends Fragment {
     private final SettingsManager.TemperatureUnits FAHRENHEIT =
             SettingsManager.TemperatureUnits.FAHRENHEIT;
 
+
+    private static SharedPreferences mSharedPreferences;
+
     private TextView mTextViewTimeUpdate;
     private TextView mTextViewTemperature;
     private TextView mTextViewHumidity;
@@ -39,6 +43,8 @@ public class SensorFragment extends Fragment {
     private ImageView mImageViewActiveState;
     private Button mButtonPeepSelect;
     private Button mButtonPeepConfig;
+
+    private PeepUnit peep;
 
     private int interval;
 
@@ -53,7 +59,7 @@ public class SensorFragment extends Fragment {
     private Runnable mHandlerTask = new Runnable() {
         @Override
         public void run() {
-            PeepUnit peep = mPeepUnitManager.getPeepUnitActive();
+            peep = mPeepUnitManager.getPeepUnitActive();
 
            // mButtonPeepSelect.setText(peep.getName());
             mButtonPeepSelect.setText("Hatch Data");
@@ -79,9 +85,14 @@ public class SensorFragment extends Fragment {
     public void onActivityCreated(Bundle bundle) {
         super.onActivityCreated(bundle);
 
+        getActivity().setTitle(getResources().getText(R.string.title_activity_main));
+
+        mSharedPreferences = getActivity().getApplicationContext().getSharedPreferences("UserData",getActivity().getApplicationContext().MODE_PRIVATE);
+
+
         mPeepUnitManager = new PeepUnitManager();
         mSettingsManager = new SettingsManager();
-        PeepUnit peep = mPeepUnitManager.getPeepUnitActive();
+        peep = mPeepUnitManager.getPeepUnitActive();
 
         mTextViewTimeUpdate = getView().findViewById(R.id.textViewTimeUpdate);
         mTextViewTemperature = getView().findViewById(R.id.textViewTemperature);
@@ -91,7 +102,7 @@ public class SensorFragment extends Fragment {
         mTextViewActiveState = getView().findViewById(R.id.textViewActiveState);
         mTextViewPeepName = getView().findViewById(R.id.textViewPeepName);
         mButtonPeepSelect = getView().findViewById(R.id.buttonPeepSelect);
-        mButtonPeepConfig = getView().findViewById(R.id.buttonPeepConfig);
+        //mButtonPeepConfig = getView().findViewById(R.id.buttonPeepConfig);
         mImageViewActiveState = getView().findViewById(R.id.imageViewActiveState);
 
         SettingsManager.TemperatureUnits units = mSettingsManager.getTemperatureUnits();
@@ -128,7 +139,7 @@ public class SensorFragment extends Fragment {
         }
         else {
             mImageViewActiveState.setImageResource(R.drawable.ic_block_red);
-            mTextViewActiveState.setText("Inactive");
+            mTextViewActiveState.setText("Offline");
             mTextViewActiveState.setTextColor(ContextCompat.getColor(
                     getContext(),
                     R.color.redInactive));
@@ -147,6 +158,12 @@ public class SensorFragment extends Fragment {
                 ft.commit();
                 */
 
+                getActivity().setTitle("Getting sensor data...");
+
+                SharedPreferences.Editor editor = mSharedPreferences.edit();
+                editor.putString("selected_hatch_uuid", peep.getLastHatch().getUUID());
+                editor.commit();
+
                 Fragment fragment = new PeepSensorDataFragment();
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
                 ft.replace(R.id.content_view, fragment);
@@ -155,7 +172,7 @@ public class SensorFragment extends Fragment {
                 ft.commit();
             }
         });
-
+        /*
         mButtonPeepConfig.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -171,6 +188,7 @@ public class SensorFragment extends Fragment {
                 ft.commit();
             }
         });
+        */
 
 
 
@@ -263,7 +281,8 @@ public class SensorFragment extends Fragment {
                 String text = "Last Updated: " + localTime;
                 mTextViewTimeUpdate.setText(text);
 
-                if (unixTime < (int)(peepMeasurement.getUnixTimestamp() + (int)(interval*60)) ) {
+
+                if (unixTime <= (int)(peepMeasurement.getUnixTimestamp() + (int)(interval*60)) ) {
                     mImageViewActiveState.setImageResource(R.drawable.ic_check_green);
                     mTextViewActiveState.setText("Active");
                     mTextViewActiveState.setTextColor(ContextCompat.getColor(
@@ -272,7 +291,7 @@ public class SensorFragment extends Fragment {
                 }
                 else {
                     mImageViewActiveState.setImageResource(R.drawable.ic_block_red);
-                    mTextViewActiveState.setText("Inactive");
+                    mTextViewActiveState.setText("Offline");
                     mTextViewActiveState.setTextColor(ContextCompat.getColor(
                             getContext(),
                             R.color.redInactive));

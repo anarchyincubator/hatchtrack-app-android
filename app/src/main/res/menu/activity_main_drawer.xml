@@ -7,9 +7,9 @@
         <item android:title="Menu">
             <menu>
                 <item
-                    android:id="@+id/navMonitor"
-                    android:icon="@drawable/ic_eye_black_24dp"
-                    android:title="Monitor" />
+                    android:id="@+id/navHatches"
+                    android:icon="@drawable/menu_hatch"
+                    android:title="Hatches" />
                 <item
                     android:id="@+id/navPeepSelect"
                     android:icon="@drawable/ic_peep"

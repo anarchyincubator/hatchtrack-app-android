@@ -83,6 +83,9 @@ public class AccountManager {
          * Begin authorization process with AWS Cognito. On either success or failure, use the
          * functions provided in AccountManagerCallback to inform the callee.
          */
+
+
+
         mAccountManagerCallback = accountManagerCallback;
 
         CognitoUser user = mUserPool.getUser(mEmail);

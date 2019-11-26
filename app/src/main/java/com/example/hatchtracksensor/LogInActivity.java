@@ -36,7 +36,7 @@ public class LogInActivity extends AppCompatActivity {
         setContentView(R.layout.activity_log_in);
 
         mButtonSignIn = findViewById(R.id.buttonSignIn);
-        mButtonCreateAccount = findViewById(R.id.buttonConfirmAccount);
+        mButtonCreateAccount = findViewById(R.id.buttonCreateAccount);
         mTextViewStatus = findViewById(R.id.textViewStatus);
         mEditTextEmail = findViewById(R.id.editTextEmail);
         mEditTextPassword = findViewById(R.id.editTextPassword);
@@ -48,8 +48,8 @@ public class LogInActivity extends AppCompatActivity {
                 "UserData",
                 getApplicationContext().MODE_PRIVATE);
 
-       // mSharedPreferences.edit().clear().commit();
-        
+        // mSharedPreferences.edit().clear().commit();
+
 
 
         /*
@@ -63,15 +63,14 @@ public class LogInActivity extends AppCompatActivity {
         if (null != data) {
             mTextViewStatus.setVisibility(View.VISIBLE);
             mTextViewStatus.setText("Account registered!");
-        }
-        else {
+        } else {
             mTextViewStatus.setVisibility(View.INVISIBLE);
         }
 
         // Grab the cached Email and Password.
         mAccountManager = new AccountManager(getApplicationContext());
         mEmail = mAccountManager.getEmail();
-        if(getIntent().getStringExtra("mEmail")!=null){
+        if (getIntent().getStringExtra("mEmail") != null) {
             mEmail = getIntent().getStringExtra("mEmail");
         }
 
@@ -80,13 +79,19 @@ public class LogInActivity extends AppCompatActivity {
         mEditTextPassword.setText(mPassword);
     }
 
-    public void onClickButtonSignIn(View v)
-    {
+    public void onClickButtonSignIn(View v) {
         mProgressBar.setVisibility(View.VISIBLE);
         /*
          * Grab the user submitted Email and Password, pass them off to the AccountManager which
          * will validate it with AWS Cognito.
          */
+
+
+        SharedPreferences csiCachedTokens = getApplicationContext().getSharedPreferences("CognitoIdentityProviderCache", 0);
+        SharedPreferences.Editor cacheEdit = csiCachedTokens.edit();
+        cacheEdit.clear();
+        cacheEdit.apply();
+
         mEmail = mEditTextEmail.getText().toString();
         mPassword = mEditTextPassword.getText().toString();
 
@@ -108,25 +113,21 @@ public class LogInActivity extends AppCompatActivity {
             public void onFailure(String response) {
                 mProgressBar.setVisibility(View.GONE);
 
-                Log.i("onFailureon",response);
+                Log.i("onFailureon", response);
 
 
-                if(response.contains("User does not exist")){
+                if (response.contains("User does not exist")) {
                     mTextViewStatus.setText("User does not exist");
-                }else if(response.contains("Failed to authenticate user")){
+                } else if (response.contains("Failed to authenticate user")) {
                     //Unconfirmed user account, go to enter confirm code:
                     Intent intent = new Intent(LogInActivity.this, ConfirmAccActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     intent.putExtra("mEmail", mEmail);
                     startActivity(intent);
                     //mTextViewStatus.setText("Failed to authenticate user");
-                }else{
+                } else {
                     mTextViewStatus.setText("Invalid Email or Password");
                 }
-
-
-
-
 
 
                 mTextViewStatus.setVisibility(View.VISIBLE);
@@ -137,8 +138,7 @@ public class LogInActivity extends AppCompatActivity {
         });
     }
 
-    public void onClickButtonCreateAccount(View v)
-    {
+    public void onClickButtonCreateAccount(View v) {
         /*
          * For this routine, we leverage AWS Cognito's automatically generated web page for
          * registering users. All we need to do is generate an Intent to open the URL. The AWS
@@ -148,7 +148,7 @@ public class LogInActivity extends AppCompatActivity {
 
         Intent intent = new Intent(
                     Intent.ACTION_VIEW,
-                    Uri.parse(mAccountManager.getAccountCreateURL()));
+                    Uri.parse(mAccountManager.getForgotPasswordURL()));
 
         startActivity(intent);
 */
@@ -156,6 +156,16 @@ public class LogInActivity extends AppCompatActivity {
         startActivity(intent);
 
 
+    }
 
+
+
+    public void onClickButtonForgotPassword(View v){
+
+    Intent intent = new Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse(mAccountManager.getForgotPasswordURL()));
+
+        startActivity(intent);
     }
 }

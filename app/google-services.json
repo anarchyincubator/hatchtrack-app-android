@@ -8,9 +8,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:319192432397:android:46098b00202994ec",
+        "mobilesdk_app_id": "1:319192432397:android:76a97cc01380fb652eba44",
         "android_client_info": {
-          "package_name": "com.widgt.hatchtrack"
+          "package_name": "com.example.hatchtracksensor"
         }
       },
       "oauth_client": [

@@ -8,17 +8,20 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.List;
+import android.util.Log;
 
 public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
     private List<String> mData;
+    private List<String> mData2;
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
 
     // data is passed into the constructor
-    MyRecyclerViewAdapter(Context context, List<String> data) {
+    MyRecyclerViewAdapter(Context context, List<String> data, List<String> data2) {
         this.mInflater = LayoutInflater.from(context);
         this.mData = data;
+        this.mData2 = data2;
     }
 
     // inflates the row layout from xml when needed
@@ -31,8 +34,11 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     // binds the data to the TextView in each row
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        String animal = mData.get(position);
-        holder.myTextView.setText(animal);
+        String hatchName = mData.get(position);
+        holder.mTextViewPeepName.setText(hatchName);
+        holder.mTextViewPeepLatestHatchTitle.setText("Current Hatch");
+        Log.i("mData2.get(position)",mData2.get(position));
+        holder.mTextViewPeepLastHatch.setText(mData2.get(position));
     }
 
     // total number of rows
@@ -44,11 +50,16 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
 
     // stores and recycles views as they are scrolled off screen
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView myTextView;
+        TextView mTextViewPeepName;
+        TextView mTextViewPeepLatestHatchTitle;
+        TextView mTextViewPeepLastHatch;
 
         ViewHolder(View itemView) {
             super(itemView);
-            myTextView = itemView.findViewById(R.id.textViewPeepEntry);
+            mTextViewPeepName = itemView.findViewById(R.id.textViewPeepEntry);
+            mTextViewPeepLatestHatchTitle = itemView.findViewById(R.id.textViewPeepLatestHatchTitle);
+
+            mTextViewPeepLastHatch = itemView.findViewById(R.id.textViewPeepLastHatch);
             itemView.setOnClickListener(this);
         }
 

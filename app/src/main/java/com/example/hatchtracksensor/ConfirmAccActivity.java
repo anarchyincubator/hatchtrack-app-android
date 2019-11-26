@@ -113,8 +113,8 @@ public class ConfirmAccActivity extends AppCompatActivity {
         protected JSONObject doInBackground(JSONObject... params) {
             try {
                 Log.i("createUser","START");
-                String mConfirm = mEditmConfirmCode.getText().toString();
-                resp = RestApi.confirmUser(mEmail,mConfirm);
+                //String mConfirm = mEditmConfirmCode.getText().toString();
+                //resp = RestApi.confirmUser(mEmail,mConfirm);
 
             } catch (Exception e) {
                 e.printStackTrace();
